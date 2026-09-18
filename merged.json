@@ -330,7 +330,7 @@
 "cluster": "Bivalve: temperature & pH"
 },
 {
-"study_id": "Wang_2023",
+"study_id": "Wang_2023a",
 "doi": "10.1016/j.scitotenv.2023.162112",
 "pmid": "36764539",
 "year": "2023",
@@ -2040,7 +2040,7 @@
 "cluster": "Immune priming"
 },
 {
-"study_id": "Wang_2023",
+"study_id": "Wang_2023b",
 "doi": "10.1016/j.dci.2023.105122",
 "pmid": "38104703",
 "year": "2023",
@@ -2340,7 +2340,7 @@
 "cluster": "Immune priming"
 },
 {
-"study_id": "Zhao_2024",
+"study_id": "Zhao_2024b",
 "doi": "10.3390/ijms252313174",
 "pmid": "39684884",
 "year": "2024",
@@ -3180,7 +3180,7 @@
 "cluster": "Hypoxia / salinity / pollutant / other taxa"
 },
 {
-"study_id": "Zhao_2024",
+"study_id": "Zhao_2024a",
 "doi": "10.1016/j.scitotenv.2024.173585",
 "pmid": "38810735",
 "year": "2024",

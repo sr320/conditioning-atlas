@@ -100,7 +100,10 @@ once in Excel or LibreOffice.
 6. Run the four pipeline commands above. `merge_rows.py` will print a warning
    if your new DOI collides with an existing `study_id` (a real duplicate) or
    merely shares a DOI with a different `study_id` (expected when a paper has
-   multiple experiments — just make sure that's actually true).
+   multiple experiments — just make sure that's actually true). It will *fail*
+   if one `study_id` maps to more than one DOI — two different papers from the
+   same first author and year need `a`/`b` suffixes, not the bare
+   `Lastname_Year`.
 7. Add an entry to `CHANGELOG.md` (see format below) and re-send the two
    deliverables (`Conditioning_Atlas.xlsx`, `Conditioning_Atlas_dashboard.html`).
 

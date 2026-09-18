@@ -84,6 +84,28 @@ def dedupe(rows):
     return out
 
 
+def check_study_id_doi_conflicts(rows):
+    """Hard error: one study_id must map to exactly one DOI. SCHEMA.md requires
+    that two papers from the same first author + year get distinct a/b suffixes
+    (Wang_2023a, Wang_2023b). A study_id shared across different DOIs is almost
+    always two independent sweeps each minting the bare Lastname_Year id, and it
+    silently merges two papers in every downstream table and plot."""
+    by_id = {}
+    for r in rows:
+        by_id.setdefault(r["study_id"].lower(), {}).setdefault(r["doi"].lower(), r)
+    conflicts = {k: v for k, v in by_id.items() if len(v) > 1}
+    if conflicts:
+        lines = []
+        for sid, dois in sorted(conflicts.items()):
+            lines.append(f"  {next(iter(dois.values()))['study_id']}:")
+            for doi, r in dois.items():
+                lines.append(f"    {doi}  ({r['species']}; {r['cluster']})")
+        raise SystemExit(
+            f"ERROR: {len(conflicts)} study_id(s) map to more than one DOI. Give each paper "
+            f"its own a/b suffix in the rows_*.tsv source (see SCHEMA.md, field 1):\n"
+            + "\n".join(lines)
+        )
+
 def check_duplicate_dois(rows):
     """Not an error — a paper can contribute more than one experiment — but print a
     reminder to eyeball these, since it is also the signature of an accidental
@@ -103,6 +125,7 @@ def main():
     rows = load_rows()
     print(f"Loaded {len(rows)} rows from rows_*.tsv")
     rows = dedupe(rows)
+    check_study_id_doi_conflicts(rows)
     check_duplicate_dois(rows)
 
     out_json = os.path.join(ROOT, "merged.json")
