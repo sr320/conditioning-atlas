@@ -1,0 +1,28 @@
+species	feature	value	method	tool_version	database	accession	date	evidence
+Acropora hyacinthus	contig_n50_kb	5980	NCBI assembly report			GCA_964291705.1	2026-09-17	assembly_level=Chromosome; total_length_mb=495
+Acropora millepora	busco_complete_pct	96.5	NCBI RefSeq annotation report (proteins)	4.1.4	metazoa_odb10	GCF_013753865.1	2026-09-17	single=90.0; duplicated=6.5; fragmented=0.8; missing=2.6; total_count=954
+Acropora millepora	contig_n50_kb	1091	NCBI assembly report			GCF_013753865.1	2026-09-17	assembly_level=Chromosome; total_length_mb=475
+Bugula neritina	contig_n50_kb	3969	NCBI assembly report			GCA_964035545.1	2026-09-17	assembly_level=Chromosome; total_length_mb=216
+Crassostrea gigas	busco_complete_pct	98.4	NCBI RefSeq annotation report (proteins)	4.0.2	mollusca_odb10	GCF_902806645.1	2026-09-17	single=94.0; duplicated=4.5; fragmented=0.4; missing=1.2; total_count=5295
+Crassostrea gigas	contig_n50_kb	1564	NCBI assembly report			GCF_902806645.1	2026-09-17	assembly_level=Chromosome; total_length_mb=648
+Crassostrea virginica	busco_complete_pct	98.1	NCBI RefSeq annotation report (proteins)	4.0.2	mollusca_odb10	GCF_002022765.2	2026-09-17	single=79.4; duplicated=18.7; fragmented=0.3; missing=1.6; total_count=5295
+Crassostrea virginica	contig_n50_kb	1971	NCBI assembly report			GCF_002022765.2	2026-09-17	assembly_level=Chromosome; total_length_mb=685
+Exaiptasia pallida	contig_n50_kb	14	NCBI assembly report			GCA_001417965.1	2026-09-17	assembly_level=Scaffold; total_length_mb=256
+Litopenaeus vannamei	busco_complete_pct	93.5	NCBI RefSeq annotation report (proteins)	4.0.2	arthropoda_odb10	GCF_003789085.1	2026-09-17	single=82.4; duplicated=11.1; fragmented=2.5; missing=4.0; total_count=1013
+Litopenaeus vannamei	contig_n50_kb	87	NCBI assembly report			GCF_003789085.1	2026-09-17	assembly_level=Scaffold; total_length_mb=1664
+Montipora capitata	contig_n50_kb	2048	NCBI assembly report			GCA_949126865.1	2026-09-17	assembly_level=Chromosome; total_length_mb=689
+Mytilus galloprovincialis	contig_n50_kb	77	NCBI assembly report			GCA_900618805.1	2026-09-17	assembly_level=Scaffold; total_length_mb=1282
+Nematostella vectensis	busco_complete_pct	96.9	NCBI RefSeq annotation report (proteins)	4.1.4	metazoa_odb10	GCF_932526225.1	2026-09-17	single=96.2; duplicated=0.6; fragmented=0.6; missing=2.5; total_count=954
+Nematostella vectensis	contig_n50_kb	2927	NCBI assembly report			GCF_932526225.1	2026-09-17	assembly_level=Chromosome; total_length_mb=269
+Ostrea lurida	contig_n50_kb	669	NCBI assembly report			GCA_061099505.1	2026-09-17	assembly_level=Scaffold; total_length_mb=1074
+Panopea generosa	contig_n50_kb	14	NCBI assembly report			GCA_902825435.1	2026-09-17	assembly_level=Scaffold; total_length_mb=942
+Paracentrotus lividus	contig_n50_kb	23600	NCBI assembly report			GCA_984792215.1	2026-09-17	assembly_level=Chromosome; total_length_mb=770
+Pinctada fucata	contig_n50_kb	2496	NCBI assembly report			GCA_028142955.1	2026-09-17	assembly_level=Chromosome; total_length_mb=931
+Pocillopora damicornis	contig_n50_kb	26	NCBI assembly report			GCA_003704095.1	2026-09-17	assembly_level=Scaffold; total_length_mb=234
+Ruditapes philippinarum	contig_n50_kb	28350	NCBI assembly report			GCA_964294305.1	2026-09-17	assembly_level=Chromosome; total_length_mb=1341
+Saccostrea glomerata	contig_n50_kb	40	NCBI assembly report			GCA_003671525.1	2026-09-17	assembly_level=Scaffold; total_length_mb=788
+Strongylocentrotus purpuratus	busco_complete_pct	99.3	NCBI RefSeq annotation report (proteins)	4.0.2	metazoa_odb10	GCF_000002235.5	2026-09-17	single=77.6; duplicated=21.7; fragmented=0.3; missing=0.4; total_count=954
+Strongylocentrotus purpuratus	contig_n50_kb	2052	NCBI assembly report			GCF_000002235.5	2026-09-17	assembly_level=Scaffold; total_length_mb=922
+Stylophora pistillata	contig_n50_kb	21	NCBI assembly report			GCF_002571385.2	2026-09-17	assembly_level=Scaffold; total_length_mb=398
+Tigriopus californicus	contig_n50_kb	44	NCBI assembly report			GCA_007210705.1	2026-09-17	assembly_level=Chromosome; total_length_mb=191
+Tigriopus japonicus	contig_n50_kb	71	NCBI assembly report			GCA_010645155.1	2026-09-17	assembly_level=Chromosome; total_length_mb=197

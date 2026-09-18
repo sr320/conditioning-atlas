@@ -3,6 +3,37 @@
 Format: newest first. One entry per maintenance pass. See README.md § "Updating the
 atlas" for what a normal entry should record.
 
+## 2026-09-17 — Genome pipeline, phase 1 (accessions and quality gate)
+
+- Goal: replace taxon-level imputation on the Priming likelihood page with
+  values computed from the public assemblies. 133 of 154 scored genome cells
+  in the 22-species panel were `not reported`. Plan and provenance rule are in
+  `genomics/README.md`; computed values will be a third class (curated over
+  computed over imputed) recorded in `genome_derived.tsv`, never written into
+  `genome_features.tsv`.
+- Resolved NCBI accessions for 9 of the 10 species that lacked one, preferring
+  RefSeq-annotated, then chromosome-level, then the NCBI representative
+  assembly: *R. philippinarum* GCA_964294305.1, *O. lurida* GCA_061099505.1,
+  *P. fucata* GCA_028142955.1, *A. hyacinthus* GCA_964291705.1,
+  *S. pistillata* GCF_002571385.2 (RefSeq proteome; a 2026 chromosome-level
+  GCA exists), *M. capitata* GCA_949126865.1 (size corrected from the 2019
+  draft's 886 Mb to 689 Mb), *T. japonicus* GCA_010645155.1, *P. lividus*
+  GCA_984792215.1, *B. neritina* GCA_964035545.1. *O. labronica* has no NCBI
+  assembly. Assembly level and size in `genome_features.tsv` now follow the
+  chosen accession, with the accession added to `sources`.
+- New `genomics/` directory: conda environment, `fetch_assemblies.py`
+  (NCBI Datasets download + manifest), `run_busco.sh` (metazoa_odb10, proteins
+  mode where a proteome exists), `collect_derived.py` (ingests NCBI-reported
+  BUSCO and our own runs into `genome_derived.tsv`). Downloads and results are
+  git-ignored; BUSCO runs on the lab server, not locally or in CI.
+- `genome_derived.tsv` seeded from NCBI dataset reports: contig N50 for all 21
+  accessioned species and BUSCO completeness for the six RefSeq-annotated
+  assemblies (93.5–99.3%, per-clade lineages, so not yet comparable with our
+  uniform metazoa_odb10 runs).
+- Decisions recorded: computed values will feed the score directly, shown with
+  a distinct basis; heterozygosity thresholds will be set after GenomeScope
+  values for the oysters are in hand.
+
 ## 2026-09-17 — Priming likelihood page
 
 - New page, `docs/priming-likelihood.html` (also `Priming_Likelihood.html`),

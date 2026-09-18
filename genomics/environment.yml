@@ -1,0 +1,21 @@
+name: conditioning-atlas-genomics
+channels:
+  - conda-forge
+  - bioconda
+dependencies:
+  - python>=3.10
+  # phase 1: fetch + quality gate
+  - ncbi-datasets-cli>=16
+  - busco>=5.7
+  - seqkit>=2.5
+  # phase 2: methylation machinery, CpG O/E, domain counts
+  - hmmer>=3.4
+  - miniprot>=0.13
+  - mafft
+  - iqtree>=2
+  # phase 3: repeat fraction
+  - red
+  # phase 4: heterozygosity from k-mer spectra
+  - kmc>=3
+  - genomescope2
+  - sra-tools>=3
