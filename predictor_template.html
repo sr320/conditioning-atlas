@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Priming likelihood</title>
+<meta name="description" content="Ranks marine invertebrate species by the relative likelihood that a sublethal priming exposure produces a favourable response, from genome and life-history features, beside the Conditioning Atlas's own evidence.">
+<style>
+  :root{
+    color-scheme: light;
+    --page:#f9f9f7; --surface-1:#fcfcfb;
+    --ink:#0b0b0b; --ink-2:#52514e; --muted:#898781;
+    --grid:#e1e0d9; --axis:#c3c2b7; --border:rgba(11,11,11,0.10);
+    --navy:#1F3864;
+    --s100:#cde2fb; --s150:#b7d3f6; --s200:#9ec5f4; --s250:#86b6ef;
+    --s300:#6da7ec; --s350:#5598e7; --s400:#3987e5; --s450:#2a78d6;
+    --s500:#256abf; --s550:#1c5cab; --s600:#184f95; --s650:#104281; --s700:#0d366b;
+    --series-1:#2a78d6; --series-warn:#e34948;
+    --chip:#ffffff;
+  }
+  :root[data-theme="dark"]{
+    color-scheme: dark;
+    --page:#0d0d0d; --surface-1:#1a1a19;
+    --ink:#ffffff; --ink-2:#c3c2b7; --muted:#898781;
+    --grid:#2c2c2a; --axis:#383835; --border:rgba(255,255,255,0.10);
+    --navy:#cde2fb;
+    --s100:#0d366b; --s150:#104281; --s200:#184f95; --s250:#1c5cab;
+    --s300:#256abf; --s350:#2a78d6; --s400:#3987e5; --s450:#5598e7;
+    --s500:#6da7ec; --s550:#86b6ef; --s600:#9ec5f4; --s650:#b7d3f6; --s700:#cde2fb;
+    --series-1:#3987e5; --series-warn:#e66767;
+    --chip:#242422;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:var(--page); color:var(--ink);
+    font-family:system-ui,-apple-system,"Segoe UI",sans-serif; font-size:14px; line-height:1.5;
+  }
+  .wrap{max-width:1360px;margin:0 auto;padding:28px 24px 80px}
+  header{display:flex;align-items:flex-start;justify-content:space-between;gap:24px;margin-bottom:6px}
+  h1{font-size:27px;margin:0 0 4px;letter-spacing:-0.02em;color:var(--ink)}
+  .sub{color:var(--ink-2);font-size:14px;margin:0;max-width:72ch}
+  .header-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .header-action{
+    background:var(--surface-1);border:1px solid var(--border);border-radius:8px;
+    color:var(--ink-2);padding:7px 12px;font-size:12.5px;cursor:pointer;font-family:inherit;
+    line-height:1.5;text-decoration:none;white-space:nowrap
+  }
+  .header-action:hover{color:var(--ink)}
+  @media(max-width:640px){header{flex-direction:column;gap:12px}.header-actions{align-self:stretch}}
+  .lede{
+    margin:18px 0 22px;padding:14px 16px;background:var(--surface-1);
+    border:1px solid var(--border);border-left:3px solid var(--series-1);border-radius:8px;
+    color:var(--ink-2);font-size:13.5px;max-width:96ch
+  }
+  .card{background:var(--surface-1);border:1px solid var(--border);border-radius:10px;padding:18px 20px 16px;margin-bottom:16px}
+  .card h2{font-size:15px;margin:0 0 3px;color:var(--ink);font-weight:650}
+  .card h3{font-size:12.5px;margin:16px 0 8px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:0.05em}
+  .card .cap{font-size:12.5px;color:var(--ink-2);margin:0 0 14px;max-width:92ch}
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .row2 > .card{margin-bottom:0}
+  .row2{margin-bottom:16px}
+  @media(max-width:900px){.row2{grid-template-columns:1fr}}
+  .toolbar{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;margin-bottom:12px}
+  .f{display:flex;flex-direction:column;gap:4px}
+  .f label{font-size:10.5px;text-transform:uppercase;letter-spacing:0.06em;color:var(--muted);font-weight:600}
+  select,input[type=search],input[type=number],input[type=text]{
+    font-family:inherit;font-size:13px;padding:6px 9px;border-radius:7px;
+    border:1px solid var(--axis);background:var(--chip);color:var(--ink);min-width:150px
+  }
+  .btn{
+    background:none;border:1px solid var(--axis);color:var(--ink-2);
+    border-radius:7px;padding:6px 11px;font-size:12.5px;cursor:pointer;font-family:inherit
+  }
+  .btn:hover{color:var(--ink)}
+  table{border-collapse:collapse;width:100%;font-size:12px}
+  th{
+    text-align:left;padding:7px 9px;border-bottom:1.5px solid var(--axis);color:var(--muted);
+    font-size:10px;text-transform:uppercase;letter-spacing:0.05em;position:sticky;top:0;background:var(--surface-1);white-space:nowrap
+  }
+  td{padding:7px 9px;border-bottom:1px solid var(--grid);color:var(--ink-2);vertical-align:top}
+  td.sp{font-style:italic;color:var(--ink);white-space:nowrap}
+  td.sp small{font-style:normal;color:var(--muted);display:block;font-size:11px}
+  td.num{font-variant-numeric:tabular-nums;text-align:right}
+  .rank-tbl tbody tr{cursor:pointer}
+  .rank-tbl tbody tr:hover td{background:color-mix(in srgb,var(--s100) 40%,transparent)}
+  .rank-tbl tbody tr.sel td{background:var(--s100)}
+  .rank-tbl tbody tr.sel td.sp{color:var(--ink)}
+  a{color:var(--series-1)}
+  .pill{display:inline-block;padding:1.5px 7px;border-radius:20px;font-size:10.5px;font-weight:600;white-space:nowrap}
+  .tier-Higher{background:var(--s550);color:#fff}
+  .tier-Moderate{background:var(--s250);color:var(--ink)}
+  .tier-Lower{background:var(--grid);color:var(--ink-2)}
+  :root[data-theme="dark"] .tier-Higher{color:#0b0b0b}
+  .badge{display:inline-block;border:1px solid var(--axis);border-radius:6px;padding:1px 7px;font-size:11px;color:var(--ink-2);white-space:nowrap;margin-right:4px}
+  .badge.ok{border-color:var(--s450);color:var(--ink)}
+  .hero{display:flex;flex-wrap:wrap;align-items:flex-end;gap:14px 22px;margin:6px 0 10px}
+  .hero .big{font-size:34px;line-height:1;letter-spacing:-0.02em;color:var(--ink)}
+  .hero .big small{font-size:14px;color:var(--muted);letter-spacing:0;margin-left:4px}
+  .hero .pill{font-size:12.5px;padding:4px 11px}
+  .spname{font-size:19px;font-style:italic;color:var(--ink);margin:0}
+  .spmeta{color:var(--ink-2);font-size:12.5px;margin:2px 0 8px}
+  .cov{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--ink-2);margin:6px 0 4px}
+  .cov .trk{flex:0 0 140px}
+  .trk{height:9px;background:var(--grid);border-radius:5px;position:relative;overflow:hidden}
+  .fill{height:100%;border-radius:5px;background:var(--s450)}
+  .fill.imp{background:repeating-linear-gradient(-45deg,var(--s350) 0 3px,transparent 3px 7px)}
+  .feat{display:grid;grid-template-columns:210px 1fr 250px;gap:12px;align-items:center;padding:7px 0;border-bottom:1px solid var(--grid)}
+  .feat:last-child{border-bottom:0}
+  .feat .lab{font-size:12.5px;color:var(--ink)}
+  .feat .lab small{display:block;color:var(--muted);font-size:10.5px;text-transform:uppercase;letter-spacing:0.05em}
+  .feat .val{font-size:12px;color:var(--ink-2)}
+  .feat .val.imp{color:var(--muted);font-style:italic}
+  .feat .trk{width:100%}
+  .feat .trkwrap{display:flex;align-items:center}
+  @media(max-width:800px){.feat{grid-template-columns:1fr;gap:4px}}
+  details.more{margin-top:12px}
+  details.more summary{cursor:pointer;color:var(--ink-2);font-size:12.5px}
+  details.more summary:hover{color:var(--ink)}
+  .kv{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:8px 0 12px}
+  .kv .k{font-size:10.5px;text-transform:uppercase;letter-spacing:0.06em;color:var(--muted);font-weight:600}
+  .kv .v{font-size:22px;line-height:1.1;letter-spacing:-0.02em;color:var(--ink)}
+  .kv .n{font-size:11.5px;color:var(--ink-2);margin-top:3px}
+  .chips{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 10px}
+  .chip{background:var(--chip);border:1px solid var(--axis);border-radius:20px;padding:2px 9px;font-size:11.5px;color:var(--ink-2)}
+  .dir-Improved{background:var(--s500);color:#fff}
+  .dir-Mixed{background:var(--s250);color:var(--ink)}
+  .dir-No.effect,.dir-Noeffect{background:var(--grid);color:var(--ink-2)}
+  .dir-Worsened{background:var(--series-warn);color:#fff}
+  .dir-Not.assessable,.dir-Notassessable{background:var(--chip);color:var(--muted);border:1px solid var(--axis)}
+  :root[data-theme="dark"] .dir-Improved{color:#0b0b0b}
+  .slider-row{display:grid;grid-template-columns:230px 1fr 64px;gap:12px;align-items:center;padding:5px 0}
+  .slider-row .lab{font-size:12.5px;color:var(--ink)}
+  .slider-row .pct{font-variant-numeric:tabular-nums;font-size:12px;color:var(--ink-2);text-align:right}
+  input[type=range]{width:100%;accent-color:var(--s450);margin:0}
+  @media(max-width:700px){.slider-row{grid-template-columns:1fr 60px}.slider-row .lab{grid-column:1/-1}}
+  .wgrid{display:grid;grid-template-columns:1fr 1fr;gap:0 28px}
+  @media(max-width:900px){.wgrid{grid-template-columns:1fr}}
+  .wi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px 14px;margin-bottom:12px}
+  .wi-grid select,.wi-grid input{min-width:0;width:100%}
+  .empty{color:var(--muted);font-size:13px;padding:18px 0}
+  .note{font-size:12px;color:var(--ink-2)}
+  .src a{margin-right:10px;font-size:12px}
+  svg{display:block;width:100%;overflow:visible}
+  .tip{
+    position:fixed;pointer-events:none;opacity:0;transition:opacity .09s;
+    background:var(--surface-1);color:var(--ink);border:1px solid var(--border);
+    border-radius:8px;padding:9px 11px;font-size:12px;max-width:340px;z-index:99;
+    box-shadow:0 6px 20px rgba(0,0,0,.16);line-height:1.45
+  }
+  .tip b{color:var(--ink)}
+  .method-tbl td{font-size:12px}
+  .method-tbl .lv{white-space:nowrap}
+  footer{color:var(--muted);font-size:12px;margin-top:26px;max-width:100ch;line-height:1.6}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <div>
+    <h1>Priming likelihood</h1>
+    <p class="sub">Which marine invertebrates are most likely to respond favourably to a priming exposure, judged from genome and life-history features — <span id="hdrN"></span> species ranked, <span id="hdrA"></span> of them with evidence in the Conditioning Atlas.</p>
+  </div>
+  <div class="header-actions">
+    <a class="header-action" href="https://sr320.github.io/conditioning-atlas/">← Conditioning Atlas</a>
+    <a class="header-action" href="https://github.com/sr320/conditioning-atlas">GitHub repository</a>
+    <button class="header-action" id="tt">Dark mode</button>
+  </div>
+</header>
+
+<div class="lede" id="lede"></div>
+
+<div class="card">
+  <h2>Panel ranking</h2>
+  <p class="cap">Every species in the curated panel, ranked by the rubric under the current weights. <b>Tier</b> is the top, middle, or bottom third of this panel. <b>Coverage</b> is how much of the score rests on curated values rather than taxon-level imputation. Click a row to inspect it.</p>
+  <div class="toolbar">
+    <div class="f"><label for="fTax">Taxon</label><select id="fTax"></select></div>
+    <div class="f"><label for="fSp">Jump to species</label><select id="fSp"></select></div>
+  </div>
+  <div id="rank"></div>
+</div>
+
+<div class="row2">
+  <div class="card" id="selCard">
+    <h2>Selected species</h2>
+    <p class="cap">Rank and tier first; the numeric score sits behind the breakdown. Each bar's <em>length</em> is the feature's weight and its <em>fill</em> is the species' score on that feature. Hatched bars are imputed from the taxon mean.</p>
+    <div id="sel"></div>
+  </div>
+  <div class="card" id="atlasCard">
+    <h2>Atlas evidence</h2>
+    <p class="cap">What the Conditioning Atlas actually contains for this species and its taxon. This is shown beside the rubric, not blended into it: the atlas's direction ratios reflect which stressors and designs were studied as much as biology.</p>
+    <div id="atlas"></div>
+  </div>
+</div>
+
+<div class="card">
+  <h2>Adjust the weights</h2>
+  <p class="cap">Defaults are the rubric's published weights. Sliders are renormalised so the effective weights always sum to 100%. Changes are kept in this browser only and the ranking above updates live.</p>
+  <div class="wgrid" id="weights"></div>
+  <div class="toolbar" style="margin-top:10px"><button class="btn" id="wReset">Reset to defaults</button><span class="note" id="wNote"></span></div>
+</div>
+
+<div class="card">
+  <h2>What-if species</h2>
+  <p class="cap">Enter the features of a species that is not in the panel, or vary one feature of a species that is, and see where it would fall. Leave anything unknown as <em>not reported</em> and it will be imputed from the chosen taxon.</p>
+  <div class="toolbar">
+    <div class="f"><label for="wiName">Label</label><input type="text" id="wiName" placeholder="e.g. Candidate species"></div>
+    <div class="f"><label for="wiTax">Taxon (for imputation)</label><select id="wiTax"></select></div>
+    <div class="f"><label for="wiFrom">Start from a panel species</label><select id="wiFrom"></select></div>
+    <button class="btn" id="wiClear">Clear</button>
+  </div>
+  <div class="wi-grid" id="wiForm"></div>
+  <div id="wiOut"></div>
+</div>
+
+<div class="card">
+  <h2>Anchor check against the atlas</h2>
+  <p class="cap">Does the rubric agree with what the atlas has observed? Each point is a panel species with at least two assessable atlas experiments; the vertical axis is the share of those experiments coded <em>Improved</em>. With this few species it is a plausibility check, not validation, and the atlas fractions are confounded by which stressors were tested.</p>
+  <div id="anchor"></div>
+</div>
+
+<div class="card">
+  <h2>Method and rubric</h2>
+  <p class="cap" id="methodCap"></p>
+  <div id="method"></div>
+</div>
+
+<footer id="foot"></footer>
+</div>
+<div class="tip" id="tip"></div>
+
+<script>
+const PANEL = __PANEL__;
+const ATLAS = __ATLAS__;
+const MODEL = __MODEL__;
+const NR="not reported";
+const TAXA=["Bivalve","Coral/cnidarian","Crustacean","Echinoderm","Polychaete/other","Gastropod"];
+const DIRS=["Improved","Mixed","No effect","Worsened","Not assessable"];
+const tip=document.getElementById("tip");
+function esc(s){return String(s??"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;")}
+function cssv(v){return getComputedStyle(document.documentElement).getPropertyValue(v).trim()}
+function showTip(html,e){tip.innerHTML=html;tip.style.opacity=1;moveTip(e)}
+function moveTip(e){
+  const r=tip.getBoundingClientRect();
+  let x=e.clientX+14,y=e.clientY+14;
+  if(x+r.width>innerWidth-10)x=e.clientX-r.width-14;
+  if(y+r.height>innerHeight-10)y=e.clientY-r.height-14;
+  tip.style.left=x+"px";tip.style.top=y+"px";
+}
+function hideTip(){tip.style.opacity=0}
+function bind(el,html){
+  el.addEventListener("mouseenter",e=>showTip(html,e));
+  el.addEventListener("mousemove",moveTip);
+  el.addEventListener("mouseleave",hideTip);
+}
+const SVGNS="http://www.w3.org/2000/svg";
+function mk(t,a){const e=document.createElementNS(SVGNS,t);for(const k in a)e.setAttribute(k,a[k]);return e}
+function doiLink(d){return /^10\./.test(d)?`<a href="https://doi.org/${esc(d)}" target="_blank" rel="noopener">${esc(d)}</a>`:esc(d)}
+function pnum(s){s=String(s||"").trim();if(s.toLowerCase().includes(NR))return null;const m=/-?\d+\.?\d*/.exec(s.replace(/,/g,""));return m?parseFloat(m[0]):null}
+function dirClass(d){return "dir-"+String(d).replace(/\s+/g,"")}
+
+/* ---------- weights ---------- */
+function defaultW(){const o={};MODEL.features.forEach(f=>o[f.id]=f.weight);return o}
+function loadW(){
+  try{const s=localStorage.getItem("pl-weights-"+MODEL.version);
+    if(s){const o=JSON.parse(s);if(MODEL.features.every(f=>typeof o[f.id]==="number"))return o}}catch(e){}
+  return defaultW();
+}
+function saveW(){try{localStorage.setItem("pl-weights-"+MODEL.version,JSON.stringify(W))}catch(e){}}
+let W=loadW();
+function normW(){const t=Object.values(W).reduce((a,b)=>a+b,0)||1;const o={};for(const k in W)o[k]=W[k]/t;return o}
+function isDefaultW(){return MODEL.features.every(f=>Math.abs(W[f.id]-f.weight)<1e-9)}
+
+/* ---------- scoring ---------- */
+function rawScore(f,r){
+  if(f.type==="levels"){const v=r[f.field];return (v in f.levels)?{s:f.levels[v],txt:v}:null}
+  if(f.type==="bands"){
+    const v=parseFloat(r[f.field]);if(isNaN(v))return null;
+    for(const [b,s] of f.bands){if(b===null||v<b)return {s,txt:v+"% of assembly"}}
+  }
+  if(f.type==="machinery"){
+    const vals=f.fields.map(k=>r[k]||NR);if(vals.every(v=>v===NR))return null;
+    let s=f.rule.dnmt3[r.dnmt3||NR]??0.5;s+=(f.rule.dnmt1[r.dnmt1]||0);s+=(f.rule.tet[r.tet]||0);
+    s=Math.max(0,Math.min(1,s));
+    return {s,txt:f.fields.map(k=>k.toUpperCase()+" "+(r[k]||NR).toLowerCase()).join(" · ")};
+  }
+  return null;
+}
+function impute(f,r){
+  const known=PANEL.filter(p=>p!==r&&p.taxon===r.taxon).map(p=>rawScore(f,p)).filter(Boolean);
+  if(known.length>=MODEL.imputation.min_known)return {s:known.reduce((a,b)=>a+b.s,0)/known.length,n:known.length};
+  return {s:MODEL.imputation.fallback,n:0};
+}
+function scoreRow(r){
+  const nw=normW();let total=0,cov=0;const parts=[];
+  for(const f of MODEL.features){
+    let raw=rawScore(f,r),imputed=false,n=0;
+    if(!raw){const i=impute(f,r);raw={s:i.s,txt:NR};imputed=true;n=i.n}else cov+=nw[f.id];
+    const c=nw[f.id]*raw.s;total+=c;
+    parts.push({f,score:raw.s,txt:raw.txt,imputed,n,w:nw[f.id],contrib:c});
+  }
+  return {total,cov,parts};
+}
+function tierOf(rank,n){const q=rank/n;return q<=1/3?MODEL.tiers[0]:q<=2/3?MODEL.tiers[1]:MODEL.tiers[2]}
+function ranked(){
+  const rows=PANEL.map(r=>Object.assign({r},scoreRow(r))).sort((a,b)=>b.total-a.total||a.r.species.localeCompare(b.r.species));
+  rows.forEach((x,i)=>{x.rank=i+1;x.tier=tierOf(i+1,rows.length)});
+  return rows;
+}
+let RANKED=ranked();
+function ordinal(n){const s=["th","st","nd","rd"],v=n%100;return n+(s[(v-20)%10]||s[v]||s[0])}
+
+/* ---------- selection ---------- */
+let selected=null;
+function selectSpecies(name,push=true){
+  const hit=PANEL.find(p=>p.species===name);
+  if(!hit)return;
+  selected=hit;
+  if(push){try{history.replaceState(null,"","#"+encodeURIComponent(name))}catch(e){}}
+  renderRank();renderSelected();renderAtlas();
+  document.getElementById("fSp").value=name;
+}
+function initialSelection(){
+  const h=decodeURIComponent((location.hash||"").slice(1));
+  if(PANEL.some(p=>p.species===h))return h;
+  const pref=["Crassostrea gigas","Panopea generosa","Ostrea lurida"].find(n=>PANEL.some(p=>p.species===n));
+  return pref||RANKED[0].r.species;
+}
+
+/* ---------- tractability badge ---------- */
+function badges(r){
+  const lvl=r.assembly_level;
+  let b="";
+  if(lvl===NR)b+=`<span class="badge">assembly not curated</span>`;
+  else if(lvl==="None")b+=`<span class="badge">no reference genome</span>`;
+  else b+=`<span class="badge ${lvl==="Chromosome"?"ok":""}">${esc(lvl)}-level assembly</span>`;
+  if(r.annotation==="Yes")b+=`<span class="badge ok">annotated</span>`;
+  else if(r.annotation==="No")b+=`<span class="badge">no annotation</span>`;
+  if(r.genome_size_mb!==NR)b+=`<span class="badge">${esc(r.genome_size_mb)} Mb</span>`;
+  if(r.assembly_accession&&r.assembly_accession!==NR)b+=`<a class="badge" href="https://www.ncbi.nlm.nih.gov/datasets/genome/${esc(r.assembly_accession)}/" target="_blank" rel="noopener">${esc(r.assembly_accession)}</a>`;
+  return b;
+}
+
+/* ---------- ranking table ---------- */
+function renderRank(){
+  const tax=document.getElementById("fTax").value;
+  const rows=RANKED.filter(x=>!tax||x.r.taxon===tax);
+  if(!rows.length){document.getElementById("rank").innerHTML='<div class="empty">No panel species in this taxon.</div>';return}
+  let h='<table class="rank-tbl"><thead><tr><th>#</th><th>Species</th><th>Taxon</th><th>Tier</th><th>Coverage</th><th>Genome</th><th class="num">Atlas experiments</th></tr></thead><tbody>';
+  for(const x of rows){
+    const r=x.r,sel=selected&&selected.species===r.species;
+    h+=`<tr data-sp="${esc(r.species)}" class="${sel?"sel":""}">
+      <td class="num">${x.rank}</td>
+      <td class="sp">${esc(r.species)}<small>${esc(r.common_name)}</small></td>
+      <td>${esc(r.taxon)}</td>
+      <td><span class="pill tier-${x.tier}">${x.tier}</span></td>
+      <td><div class="cov"><div class="trk"><div class="fill" style="width:${Math.round(x.cov*100)}%"></div></div><span>${Math.round(x.cov*100)}%</span></div></td>
+      <td>${r.assembly_level==="None"?'<span class="badge">none</span>':r.assembly_level===NR?'<span class="badge">not curated</span>':`<span class="badge ${r.assembly_level==="Chromosome"?"ok":""}">${esc(r.assembly_level)}</span>`}</td>
+      <td class="num">${r.atlas_idx.length||'<span style="color:var(--muted)">0</span>'}</td></tr>`;
+  }
+  document.getElementById("rank").innerHTML=h+"</tbody></table>";
+  document.querySelectorAll("#rank tbody tr").forEach(tr=>tr.addEventListener("click",()=>selectSpecies(tr.dataset.sp)));
+}
+
+/* ---------- breakdown (shared by selected + what-if) ---------- */
+function breakdown(sc,showTotal){
+  const wmax=Math.max(...sc.parts.map(p=>p.w));
+  let h="";
+  for(const p of sc.parts){
+    const trk=Math.round(p.w/wmax*100),fill=Math.round(p.score*100);
+    const val=p.imputed
+      ?`not reported · imputed ${p.n?`from ${p.n} panel species in the same taxon`:"at neutral 0.5"}`
+      :esc(p.txt);
+    h+=`<div class="feat" data-f="${p.f.id}">
+      <div class="lab">${esc(p.f.label)}<small>${esc(p.f.group)} · weight ${Math.round(p.w*100)}%</small></div>
+      <div class="trkwrap"><div class="trk" style="width:${trk}%"><div class="fill ${p.imputed?"imp":""}" style="width:${fill}%"></div></div></div>
+      <div class="val ${p.imputed?"imp":""}">${val}</div></div>`;
+  }
+  if(showTotal){
+    h+=`<details class="more"><summary>Show numeric score and contributions</summary>
+      <p class="note" style="margin:10px 0 6px">Score <b style="color:var(--ink)">${sc.total.toFixed(3)}</b> on a 0–1 scale (weighted sum; weights normalised to 1). Coverage ${Math.round(sc.cov*100)}% curated.</p>
+      <table><thead><tr><th>Feature</th><th class="num">Weight</th><th class="num">Feature score</th><th class="num">Contribution</th><th>Basis</th></tr></thead><tbody>`;
+    for(const p of sc.parts){
+      h+=`<tr><td>${esc(p.f.label)}</td><td class="num">${(p.w*100).toFixed(1)}%</td><td class="num">${p.score.toFixed(2)}</td><td class="num">${p.contrib.toFixed(3)}</td><td>${p.imputed?'<span style="color:var(--muted)">imputed</span>':"curated"}</td></tr>`;
+    }
+    h+="</tbody></table></details>";
+  }
+  return h;
+}
+function attachFeatTips(root){
+  root.querySelectorAll(".feat").forEach(el=>{
+    const f=MODEL.features.find(x=>x.id===el.dataset.f);
+    if(f)bind(el,`<b>${esc(f.label)}</b><div style="margin-top:4px">${esc(f.rationale)}</div>`);
+  });
+}
+
+/* ---------- selected species ---------- */
+function renderSelected(){
+  const el=document.getElementById("sel");
+  if(!selected){el.innerHTML='<div class="empty">Select a species from the ranking.</div>';return}
+  const x=RANKED.find(y=>y.r.species===selected.species),r=selected;
+  let h=`<div class="hero"><span class="pill tier-${x.tier}">${x.tier} relative likelihood</span><div class="big">${ordinal(x.rank)} <small>of ${RANKED.length} in panel</small></div></div>
+    <p class="spname">${esc(r.species)}</p>
+    <p class="spmeta">${esc(r.common_name)} · ${esc(r.taxon)}${r.synonyms?` · also as <i>${esc(r.synonyms)}</i>`:""}</p>
+    <div>${badges(r)}</div>
+    <div class="cov" style="margin-top:10px"><span>Coverage</span><div class="trk"><div class="fill" style="width:${Math.round(x.cov*100)}%"></div></div><span>${Math.round(x.cov*100)}% of the score rests on curated values</span></div>
+    <h3>Why it lands here</h3>${breakdown(x,true)}`;
+  const extras=[];
+  if(r.global_cpg_methylation_pct!==NR)extras.push(`global CpG methylation ${esc(r.global_cpg_methylation_pct)}%`);
+  if(r.hsp70_count!==NR)extras.push(`${esc(r.hsp70_count)} HSP70 genes`);
+  if(r.iap_count!==NR)extras.push(`${esc(r.iap_count)} IAP genes`);
+  if(extras.length||r.expansion_notes)h+=`<h3>Curated detail</h3><p class="note">${extras.map(esc).join(" · ")}${extras.length&&r.expansion_notes?"<br>":""}${esc(r.expansion_notes)}</p>`;
+  if(r.notes)h+=`<h3>Notes</h3><p class="note">${esc(r.notes)}</p>`;
+  h+=`<h3>Sources</h3><p class="src">${r.sources===NR?'<span class="note">not reported</span>':r.sources.split(/;\s*/).map(doiLink).join('<span style="color:var(--muted)">· </span>')}</p>`;
+  el.innerHTML=h;attachFeatTips(el);
+}
+
+/* ---------- atlas evidence ---------- */
+function dirSplit(rows){
+  const c={};DIRS.forEach(d=>c[d]=0);rows.forEach(a=>{c[a.direction]=(c[a.direction]||0)+1});
+  const assess=rows.filter(a=>a.direction!=="Not assessable").length;
+  return {c,assess,imp:c["Improved"]||0};
+}
+function renderAtlas(){
+  const el=document.getElementById("atlas");
+  if(!selected){el.innerHTML="";return}
+  const r=selected,rows=r.atlas_idx.map(i=>ATLAS[i]);
+  const taxRows=ATLAS.filter(a=>a.taxon===r.taxon),ts=dirSplit(taxRows);
+  let h="";
+  if(!rows.length){
+    h+=`<div class="empty">No experiments for <i>${esc(r.species)}</i> in the atlas${r.common_name.includes("comparator")?" (included as a comparator)":""}.</div>`;
+  }else{
+    const ds=dirSplit(rows),papers=new Set(rows.map(a=>a.doi.toLowerCase())).size;
+    const pv=rows.map(a=>pnum(a.persistence_days)).filter(v=>v!==null);
+    const decay=rows.filter(a=>a.decay!=="Not tested").length;
+    h+=`<div class="kv">
+      <div><div class="k">Experiments</div><div class="v">${rows.length}</div><div class="n">${papers} paper${papers===1?"":"s"}</div></div>
+      <div><div class="k">Improved</div><div class="v">${ds.assess?Math.round(ds.imp/ds.assess*100)+"%":"—"}</div><div class="n">${ds.imp} of ${ds.assess} assessable</div></div>
+      <div><div class="k">Persistence</div><div class="v">${pv.length?(Math.min(...pv)===Math.max(...pv)?Math.min(...pv):`${Math.min(...pv)}–${Math.max(...pv)}`):"—"}</div><div class="n">${pv.length?"days, "+pv.length+" reported":"not reported"}</div></div>
+      <div><div class="k">Decay tested</div><div class="v">${decay}</div><div class="n">of ${rows.length} experiments</div></div></div>`;
+    h+=`<div class="chips">${DIRS.filter(d=>ds.c[d]).map(d=>`<span class="pill ${dirClass(d)}">${d} ${ds.c[d]}</span>`).join(" ")}</div>`;
+    const strs=[...new Set(rows.map(a=>a.stressor_category))];
+    h+=`<div class="chips">${strs.map(s=>`<span class="chip">${esc(s)}</span>`).join("")}</div>`;
+    h+=`<table><thead><tr><th>Study</th><th>Stressor</th><th>Primed stage</th><th>Persistence</th><th>Direction</th></tr></thead><tbody>`;
+    for(const a of rows.sort((p,q)=>q.year-p.year)){
+      h+=`<tr><td>${a.doi&&a.doi!==NR?`<a href="https://doi.org/${esc(a.doi)}" target="_blank" rel="noopener">${esc(a.study_id)}</a>`:esc(a.study_id)}</td>
+        <td>${esc(a.stressor)}</td><td>${esc(a.conditioning_stage)}</td><td>${esc(a.persistence_days)}</td>
+        <td><span class="pill ${dirClass(a.direction)}">${esc(a.direction)}</span></td></tr>`;
+    }
+    h+="</tbody></table>";
+  }
+  h+=`<h3>Taxon anchor · ${esc(r.taxon)}</h3>
+    <p class="note">${taxRows.length?`Across the atlas, <b>${ts.imp} of ${ts.assess}</b> assessable ${esc(r.taxon)} experiments (${Math.round(ts.imp/Math.max(ts.assess,1)*100)}%) were coded Improved. `:"No atlas experiments for this taxon. "}
+    ${taxRows.length?`<span class="chips" style="display:inline-flex;margin:0">${DIRS.filter(d=>ts.c[d]).map(d=>`<span class="pill ${dirClass(d)}">${d} ${ts.c[d]}</span>`).join(" ")}</span>`:""}</p>`;
+  el.innerHTML=h;
+}
+
+/* ---------- weights UI ---------- */
+function renderWeights(){
+  const el=document.getElementById("weights"),nw=normW();
+  const groups=[...new Set(MODEL.features.map(f=>f.group))];
+  let h="";
+  for(const g of groups){
+    h+=`<div><h3>${esc(g)}</h3>`;
+    for(const f of MODEL.features.filter(x=>x.group===g)){
+      h+=`<div class="slider-row"><div class="lab">${esc(f.label)}</div>
+        <input type="range" min="0" max="0.30" step="0.01" value="${W[f.id]}" data-w="${f.id}" aria-label="${esc(f.label)} weight">
+        <div class="pct" data-p="${f.id}">${Math.round(nw[f.id]*100)}%</div></div>`;
+    }
+    h+="</div>";
+  }
+  el.innerHTML=h;
+  el.querySelectorAll("input[type=range]").forEach(inp=>inp.addEventListener("input",()=>{
+    W[inp.dataset.w]=parseFloat(inp.value);saveW();recompute();
+  }));
+  updateWNote();
+}
+function updateWNote(){
+  const nw=normW();
+  document.querySelectorAll("#weights .pct").forEach(p=>p.textContent=Math.round(nw[p.dataset.p]*100)+"%");
+  document.getElementById("wNote").textContent=isDefaultW()?"Using default weights.":"Custom weights in effect — the ranking differs from the published defaults.";
+}
+
+/* ---------- what-if ---------- */
+const WI_FIELDS=(()=>{
+  const out=[];
+  for(const f of MODEL.features){
+    if(f.type==="machinery")f.fields.forEach(k=>out.push({key:k,label:k.toUpperCase(),opts:["Present","Absent"]}));
+    else if(f.type==="levels")out.push({key:f.field,label:f.label,opts:Object.keys(f.levels)});
+    else if(f.type==="bands")out.push({key:f.field,label:f.label+" (%)",num:true});
+  }
+  return out;
+})();
+const WI={taxon:"Bivalve"};
+function renderWhatIfForm(){
+  const el=document.getElementById("wiForm");
+  el.innerHTML=WI_FIELDS.map(fd=>`<div class="f"><label for="wi_${fd.key}">${esc(fd.label)}</label>${
+    fd.num?`<input type="number" id="wi_${fd.key}" data-k="${fd.key}" min="0" max="100" step="1" placeholder="${NR}" value="${WI[fd.key]&&WI[fd.key]!==NR?esc(WI[fd.key]):""}">`
+          :`<select id="wi_${fd.key}" data-k="${fd.key}"><option value="${NR}">${NR}</option>${fd.opts.map(o=>`<option ${WI[fd.key]===o?"selected":""}>${esc(o)}</option>`).join("")}</select>`
+  }</div>`).join("");
+  el.querySelectorAll("select,input").forEach(i=>i.addEventListener("input",()=>{WI[i.dataset.k]=i.value===""?NR:i.value;renderWhatIfOut()}));
+}
+function renderWhatIfOut(){
+  const el=document.getElementById("wiOut");
+  const row=Object.assign({species:"__whatif__"},WI);
+  const any=WI_FIELDS.some(fd=>WI[fd.key]&&WI[fd.key]!==NR);
+  if(!any){el.innerHTML='<div class="empty">Set at least one feature to see where a species would rank.</div>';return}
+  const sc=scoreRow(row);
+  const above=RANKED.filter(x=>x.total>sc.total).length;
+  const n=RANKED.length+1,rank=above+1,tier=tierOf(rank,n);
+  const name=document.getElementById("wiName").value.trim()||"This species";
+  let h=`<div class="hero"><span class="pill tier-${tier}">${tier} relative likelihood</span><div class="big">${ordinal(rank)} <small>of ${n} if added to the panel</small></div></div>
+    <p class="note" style="margin:0 0 8px"><b style="color:var(--ink)">${esc(name)}</b> · imputation from ${esc(WI.taxon)} panel members · ${Math.round(sc.cov*100)}% of the score from entered values.</p>`;
+  h+=breakdown(sc,true);
+  el.innerHTML=h;attachFeatTips(el);
+}
+
+/* ---------- anchor check ---------- */
+function spearman(xs,ys){
+  const rk=v=>{const idx=v.map((x,i)=>[x,i]).sort((a,b)=>a[0]-b[0]);const r=new Array(v.length);
+    for(let i=0;i<idx.length;){let j=i;while(j+1<idx.length&&idx[j+1][0]===idx[i][0])j++;const avg=(i+j)/2+1;for(let k=i;k<=j;k++)r[idx[k][1]]=avg;i=j+1}return r};
+  const a=rk(xs),b=rk(ys),n=xs.length,ma=a.reduce((p,q)=>p+q,0)/n,mb=b.reduce((p,q)=>p+q,0)/n;
+  let num=0,da=0,db=0;for(let i=0;i<n;i++){num+=(a[i]-ma)*(b[i]-mb);da+=(a[i]-ma)**2;db+=(b[i]-mb)**2}
+  return da&&db?num/Math.sqrt(da*db):NaN;
+}
+function renderAnchor(){
+  const el=document.getElementById("anchor");el.innerHTML="";
+  const pts=[];
+  for(const x of RANKED){
+    const rows=x.r.atlas_idx.map(i=>ATLAS[i]).filter(a=>a.direction!=="Not assessable");
+    if(rows.length>=2)pts.push({x,frac:rows.filter(a=>a.direction==="Improved").length/rows.length,n:rows.length});
+  }
+  if(pts.length<3){el.innerHTML='<div class="empty">Fewer than three panel species have two or more assessable atlas experiments.</div>';return}
+  const rho=spearman(pts.map(p=>p.x.total),pts.map(p=>p.frac));
+  const Wd=Math.min(el.clientWidth||900,900),H=320,m={l:52,r:20,t:14,b:44};
+  const xs=pts.map(p=>p.x.total),xmin=Math.min(...xs)-0.04,xmax=Math.max(...xs)+0.04;
+  const sx=v=>m.l+(v-xmin)/(xmax-xmin)*(Wd-m.l-m.r),sy=v=>m.t+(1-v)*(H-m.t-m.b);
+  const svg=mk("svg",{viewBox:`0 0 ${Wd} ${H}`,role:"img","aria-label":"Rubric score against share of atlas experiments coded Improved"});
+  for(let f=0;f<=1;f+=0.25){
+    svg.appendChild(mk("line",{x1:m.l,x2:Wd-m.r,y1:sy(f),y2:sy(f),stroke:cssv("--grid")}));
+    const t=mk("text",{x:m.l-8,y:sy(f)+4,"text-anchor":"end",fill:cssv("--muted"),"font-size":11});t.textContent=Math.round(f*100)+"%";svg.appendChild(t);
+  }
+  const nticks=5;
+  for(let i=0;i<=nticks;i++){
+    const v=xmin+(xmax-xmin)*i/nticks;
+    const t=mk("text",{x:sx(v),y:H-m.b+18,"text-anchor":"middle",fill:cssv("--muted"),"font-size":11});t.textContent=v.toFixed(2);svg.appendChild(t);
+  }
+  svg.appendChild(mk("line",{x1:m.l,x2:Wd-m.r,y1:sy(0),y2:sy(0),stroke:cssv("--axis")}));
+  const xl=mk("text",{x:(m.l+Wd-m.r)/2,y:H-6,"text-anchor":"middle",fill:cssv("--ink-2"),"font-size":12});xl.textContent="Rubric score (current weights)";svg.appendChild(xl);
+  const yl=mk("text",{x:12,y:(m.t+H-m.b)/2,"text-anchor":"middle",fill:cssv("--ink-2"),"font-size":12,transform:`rotate(-90 12 ${(m.t+H-m.b)/2})`});yl.textContent="Atlas experiments coded Improved";svg.appendChild(yl);
+  /* labels: nudge any that would sit on top of an earlier one (same neighbourhood) down a line,
+     so co-located species stay legible; a leader line ties a moved label back to its point */
+  const placed=[];
+  pts.sort((a,b)=>sx(a.x.total)-sx(b.x.total)||sy(a.frac)-sy(b.frac));
+  for(const p of pts){
+    const r=4+Math.sqrt(p.n)*2.2,cx=sx(p.x.total),cy=sy(p.frac);
+    const c=mk("circle",{cx,cy,r,fill:cssv("--s450"),"fill-opacity":0.75,stroke:cssv("--surface-1"),"stroke-width":1.5,style:"cursor:pointer"});
+    bind(c,`<b><i>${esc(p.x.r.species)}</i></b><div>Rank ${p.x.rank} · ${p.x.tier}</div><div>${Math.round(p.frac*100)}% Improved across ${p.n} assessable atlas experiments</div>`);
+    c.addEventListener("click",()=>selectSpecies(p.x.r.species));
+    svg.appendChild(c);
+    const g=p.x.r.species.split(" "),lab=g[0][0]+". "+g.slice(1).join(" ");
+    let lx=cx+r+4,ly=cy+4,tries=0;
+    const w=lab.length*5.6;
+    while(placed.some(q=>Math.abs(q.y-ly)<12&&lx<q.x+q.w&&lx+w>q.x)&&tries<8){ly+=13;tries++}
+    if(tries)svg.appendChild(mk("line",{x1:cx+r,y1:cy,x2:lx-2,y2:ly-4,stroke:cssv("--axis"),"stroke-width":1}));
+    placed.push({x:lx,y:ly,w});
+    const t=mk("text",{x:lx,y:ly,fill:cssv("--ink-2"),"font-size":11,"font-style":"italic"});t.textContent=lab;svg.appendChild(t);
+  }
+  el.appendChild(svg);
+  const cap=document.createElement("p");cap.className="note";
+  cap.innerHTML=`Spearman ρ = <b style="color:var(--ink)">${isNaN(rho)?"—":rho.toFixed(2)}</b> across ${pts.length} species (point size scales with experiment count). Click a point to select that species.`;
+  el.appendChild(cap);
+}
+
+/* ---------- method ---------- */
+function renderMethod(){
+  document.getElementById("methodCap").textContent=MODEL.framing;
+  let h=`<table class="method-tbl"><thead><tr><th>Feature</th><th>Group</th><th class="num">Default weight</th><th>Scoring</th><th>Rationale</th><th>Sources</th></tr></thead><tbody>`;
+  for(const f of MODEL.features){
+    let sc="";
+    if(f.type==="levels")sc=Object.entries(f.levels).map(([k,v])=>`<div class="lv">${esc(k)} → ${v}</div>`).join("");
+    else if(f.type==="bands")sc=f.bands.map(([b,s],i)=>`<div class="lv">${b===null?`≥ ${f.bands[i-1][0]}%`:i===0?`< ${b}%`:`${f.bands[i-1][0]}–${b}%`} → ${s}</div>`).join("");
+    else if(f.type==="machinery")sc=`<div class="lv">DNMT3 present 0.8 / absent 0.2 / unknown 0.5</div><div class="lv">DNMT1 present +0.1 / absent −0.15</div><div class="lv">TET present +0.1</div><div class="lv">clamped to 0–1; all three unknown → imputed</div>`;
+    h+=`<tr><td style="color:var(--ink)">${esc(f.label)}</td><td>${esc(f.group)}</td><td class="num">${Math.round(f.weight*100)}%</td><td>${sc}</td><td>${esc(f.rationale)}</td><td class="src">${f.sources.length?f.sources.map(doiLink).join("<br>"):'<span style="color:var(--muted)">—</span>'}</td></tr>`;
+  }
+  h+="</tbody></table>";
+  h+=`<h3>Imputation</h3><p class="note">${esc(MODEL.imputation.description)}</p>
+      <h3>Tractability badge</h3><p class="note">${esc(MODEL.tractability.description)}</p>
+      <h3>Tiers</h3><p class="note">${MODEL.tiers[0]}, ${MODEL.tiers[1]}, and ${MODEL.tiers[2]} are the top, middle, and bottom thirds of the panel by rank under the current weights. They are relative to this panel, so adding a species can move another species' tier.</p>
+      <h3>Source files</h3><p class="note">Panel: <a href="https://github.com/sr320/conditioning-atlas/blob/main/genome_features.tsv">genome_features.tsv</a> (<a href="https://github.com/sr320/conditioning-atlas/blob/main/GENOME_SCHEMA.md">schema</a>). Rubric: <a href="https://github.com/sr320/conditioning-atlas/blob/main/priming_model.json">priming_model.json</a>. Additions and corrections are welcome as pull requests.</p>`;
+  document.getElementById("method").innerHTML=h;
+}
+
+/* ---------- boot ---------- */
+function recompute(){
+  RANKED=ranked();
+  updateWNote();
+  renderRank();renderSelected();renderAtlas();renderWhatIfOut();renderAnchor();
+}
+function fillSelects(){
+  const present=TAXA.filter(t=>PANEL.some(p=>p.taxon===t));
+  document.getElementById("fTax").innerHTML='<option value="">All</option>'+present.map(t=>`<option>${esc(t)}</option>`).join("");
+  document.getElementById("wiTax").innerHTML=present.map(t=>`<option ${t===WI.taxon?"selected":""}>${esc(t)}</option>`).join("");
+  const sp=[...PANEL].sort((a,b)=>a.species.localeCompare(b.species));
+  document.getElementById("fSp").innerHTML=sp.map(p=>`<option>${esc(p.species)}</option>`).join("");
+  document.getElementById("wiFrom").innerHTML='<option value="">— blank —</option>'+sp.map(p=>`<option>${esc(p.species)}</option>`).join("");
+}
+function boot(){
+  document.getElementById("hdrN").textContent=PANEL.length;
+  document.getElementById("hdrA").textContent=PANEL.filter(p=>p.atlas_idx.length).length;
+  document.getElementById("lede").innerHTML=`<b>What this is.</b> ${esc(MODEL.framing)} <b>What it is not:</b> a prediction. Read a species' tier as "worth prioritising for a conditioning trial", then look at what the atlas already shows for it in the right-hand panel.`;
+  document.getElementById("foot").innerHTML=__FOOT__;
+  fillSelects();
+  renderWeights();renderMethod();renderWhatIfForm();
+  document.getElementById("fTax").addEventListener("change",renderRank);
+  document.getElementById("fSp").addEventListener("change",e=>selectSpecies(e.target.value));
+  document.getElementById("wReset").addEventListener("click",()=>{W=defaultW();saveW();renderWeights();recompute()});
+  document.getElementById("wiTax").addEventListener("change",e=>{WI.taxon=e.target.value;renderWhatIfOut()});
+  document.getElementById("wiName").addEventListener("input",renderWhatIfOut);
+  document.getElementById("wiFrom").addEventListener("change",e=>{
+    const p=PANEL.find(x=>x.species===e.target.value);
+    for(const k of Object.keys(WI))if(k!=="taxon")delete WI[k];
+    if(p){WI.taxon=p.taxon;WI_FIELDS.forEach(fd=>{if(p[fd.key]&&p[fd.key]!==NR)WI[fd.key]=p[fd.key]});document.getElementById("wiName").value=p.species+" (variant)";document.getElementById("wiTax").value=p.taxon}
+    renderWhatIfForm();renderWhatIfOut();
+  });
+  document.getElementById("wiClear").addEventListener("click",()=>{
+    for(const k of Object.keys(WI))if(k!=="taxon")delete WI[k];
+    document.getElementById("wiName").value="";document.getElementById("wiFrom").value="";
+    renderWhatIfForm();renderWhatIfOut();
+  });
+  document.getElementById("tt").addEventListener("click",()=>{
+    const d=document.documentElement.getAttribute("data-theme")==="dark";
+    document.documentElement.setAttribute("data-theme",d?"light":"dark");
+    document.getElementById("tt").textContent=d?"Dark mode":"Light mode";
+    renderAnchor();
+  });
+  window.addEventListener("hashchange",()=>{const h=decodeURIComponent(location.hash.slice(1));if(PANEL.some(p=>p.species===h))selectSpecies(h,false)});
+  window.addEventListener("resize",renderAnchor);
+  selectSpecies(initialSelection(),false);
+  renderWhatIfOut();renderAnchor();
+}
+boot();
+</script>
+</body>
+</html>

@@ -43,9 +43,13 @@ jobs:
       - name: Build dashboard and GitHub Pages copy
         run: python scripts/build_dashboard.py
 
-      - name: Verify dashboard outputs
+      - name: Validate genome panel and build Priming likelihood page
+        run: python scripts/build_predictor.py
+
+      - name: Verify dashboard and Priming likelihood outputs
         run: |
           cmp Conditioning_Atlas_dashboard.html docs/index.html
+          cmp Priming_Likelihood.html docs/priming-likelihood.html
           python - <<'PY'
           from pathlib import Path
 
@@ -54,6 +58,13 @@ jobs:
           assert "__DATA__" not in dashboard
           assert "__FOOT__" not in dashboard
           assert "<title>The Conditioning Atlas</title>" in dashboard
+          assert "priming-likelihood.html" in dashboard
+
+          page = Path("docs/priming-likelihood.html").read_text(encoding="utf-8")
+          assert page.startswith("<!DOCTYPE html>")
+          for ph in ("__PANEL__", "__ATLAS__", "__MODEL__", "__FOOT__"):
+              assert ph not in page, ph
+          assert "<title>Priming likelihood</title>" in page
           PY
 
       - name: Upload rebuilt deliverables
@@ -63,6 +74,8 @@ jobs:
           path: |
             Conditioning_Atlas.xlsx
             Conditioning_Atlas_dashboard.html
+            Priming_Likelihood.html
             conditioning_atlas.tsv
+            genome_features.tsv
           if-no-files-found: error
           retention-days: 30

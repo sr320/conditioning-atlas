@@ -125,6 +125,7 @@
     <p class="sub">Priming windows, doses, and persistence of induced environmental memory in marine invertebrates — <span id="hdrN"></span> experiments from <span id="hdrP"></span> papers.</p>
   </div>
   <div class="header-actions">
+    <a class="header-action" href="https://sr320.github.io/conditioning-atlas/priming-likelihood.html">Priming likelihood →</a>
     <a class="header-action" href="https://github.com/sr320/conditioning-atlas">GitHub repository</a>
     <button class="header-action" id="tt">Dark mode</button>
   </div>
@@ -457,7 +458,7 @@ function boot(){
   fillSelects();
   document.getElementById("hdrN").textContent=DATA.length;
   document.getElementById("hdrP").textContent=new Set(DATA.filter(r=>r.doi&&r.doi!=="not reported").map(r=>r.doi.toLowerCase())).size;
-  document.getElementById("foot").innerHTML="Assembled from PubMed, Consensus, and Scite full-text retrieval. Every DOI was resolved through Scite and checked for retractions, corrections, and expressions of concern; no editorial notices were found on any included paper at time of extraction. A verification pass then re-checked a sample of rows line-by-line against full text; see the repository CHANGELOG for what that pass corrected. Inclusion required a marine or estuarine invertebrate, a deliberate sublethal conditioning exposure applied before a later assessment, a later-life or offspring outcome, and a primary empirical design. Rows sourced from abstracts alone are marked as such in the workbook and should be checked against the full text before citation. Extraction was automated and screened against explicit criteria, but this is not a registered systematic review \u2014 no PRISMA flow, no dual independent extraction, no formal risk-of-bias assessment. Treat it as a working lab resource and the scaffold for a real review. 109 experiments \u00b7 105 papers \u00b7 built 2026-08-05.";
+  document.getElementById("foot").innerHTML="Assembled from PubMed, Consensus, and Scite full-text retrieval. Every DOI was resolved through Scite and checked for retractions, corrections, and expressions of concern; no editorial notices were found on any included paper at time of extraction. A verification pass then re-checked a sample of rows line-by-line against full text; see the repository CHANGELOG for what that pass corrected. Inclusion required a marine or estuarine invertebrate, a deliberate sublethal conditioning exposure applied before a later assessment, a later-life or offspring outcome, and a primary empirical design. Rows sourced from abstracts alone are marked as such in the workbook and should be checked against the full text before citation. Extraction was automated and screened against explicit criteria, but this is not a registered systematic review \u2014 no PRISMA flow, no dual independent extraction, no formal risk-of-bias assessment. Treat it as a working lab resource and the scaffold for a real review. 109 experiments \u00b7 105 papers \u00b7 built 2026-09-17.";
   document.getElementById("filters").addEventListener("change",render);
   document.getElementById("fQ").addEventListener("input",render);
   document.getElementById("rs").addEventListener("click",()=>{

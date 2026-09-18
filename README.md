@@ -27,9 +27,15 @@ published through GitHub Pages from `docs/index.html`.
 | `dashboard_template.html` | The dashboard's actual HTML/CSS/JS, with `__DATA__` / `__FOOT__` placeholders. | Yes — this is where chart/filter/layout changes go |
 | `Conditioning_Atlas_dashboard.html` | `dashboard_template.html` with data injected. Self-contained, opens in any browser. | **No — generated** |
 | `docs/index.html` | GitHub Pages copy of the self-contained dashboard. Configure Pages to deploy from the `main` branch's `/docs` folder. | **No — generated** |
+| `GENOME_SCHEMA.md` | The 26-column schema for the species panel behind the Priming likelihood page: allowed values, sourcing rules, and how the rubric uses each field. | Yes — this is the spec |
+| `genome_features.tsv` | Hand-curated genome and life-history features, one row per species, with a header row and a `sources` column. **Source of truth for the Priming likelihood page.** | Yes — this is where species get added or corrected |
+| `priming_model.json` | The Priming likelihood rubric: default weights, scoring rules, rationale, and sources per feature. Data, not code, so the model can be argued with in a pull request. | Yes |
+| `predictor_template.html` | The Priming likelihood page's HTML/CSS/JS, with `__PANEL__` / `__ATLAS__` / `__MODEL__` / `__FOOT__` placeholders. | Yes — this is where layout changes go |
+| `Priming_Likelihood.html` | `predictor_template.html` with panel, atlas, and rubric injected. Self-contained. | **No — generated** |
+| `docs/priming-likelihood.html` | GitHub Pages copy of the Priming likelihood page, linked from the dashboard header. | **No — generated** |
 | `CHANGELOG.md` | One entry per maintenance pass: what was added, what was corrected, and why. | Yes — append, don't rewrite history |
 | `LICENSE` | Creative Commons Attribution 4.0 International license covering this repository. | No — legal text |
-| `scripts/` | The four-step build pipeline (below). | Yes |
+| `scripts/` | The five-step build pipeline (below). | Yes |
 
 The rule of thumb: if a file's row above says "generated," don't hand-edit it —
 your edit will be silently overwritten the next time someone runs the
@@ -45,18 +51,25 @@ excluded_*.tsv┘                                    │
                                                     ├──▶ scripts/build_xlsx.py ──▶ Conditioning_Atlas.xlsx
                                                     │        └──▶ scripts/recalc_xlsx.py (computes the formula sheet)
                                                     │
-                                                    └──▶ scripts/build_dashboard.py ──▶ Conditioning_Atlas_dashboard.html
-                                                              (combines with dashboard_template.html)
-                                                              └──▶ docs/index.html (GitHub Pages)
+                                                    ├──▶ scripts/build_dashboard.py ──▶ Conditioning_Atlas_dashboard.html
+                                                    │         (combines with dashboard_template.html)
+                                                    │         └──▶ docs/index.html (GitHub Pages)
+                                                    │
+genome_features.tsv ┐                               │
+priming_model.json  ├──▶ scripts/build_predictor.py ◀┘ ──▶ Priming_Likelihood.html
+                    │         (combines with predictor_template.html)
+                    │         └──▶ docs/priming-likelihood.html (GitHub Pages)
 ```
 
-Run the whole thing after any change to `rows_*.tsv` or `excluded_*.tsv`:
+Run the whole thing after any change to `rows_*.tsv`, `excluded_*.tsv`,
+`genome_features.tsv`, or `priming_model.json`:
 
 ```bash
 python3 scripts/merge_rows.py
 python3 scripts/build_xlsx.py
 python3 scripts/recalc_xlsx.py Conditioning_Atlas.xlsx
 python3 scripts/build_dashboard.py
+python3 scripts/build_predictor.py
 ```
 
 Create a virtual environment and install the Python dependency before running
@@ -143,6 +156,42 @@ values), then to the `HDR` list in **all three** of `scripts/merge_rows.py`,
 value inserted at the new column position, in order — a length mismatch will
 make `merge_rows.py` raise immediately (it validates field count per line), so
 you'll find out fast if a file was missed.
+
+## The Priming likelihood page
+
+[`docs/priming-likelihood.html`](https://sr320.github.io/conditioning-atlas/priming-likelihood.html)
+ranks a curated panel of marine invertebrate species by the **relative
+likelihood that a sublethal priming exposure produces a favourable later-life
+or offspring response**, judged from genome features (methylation machinery,
+genome-wide methylation pattern, stress/immune gene family expansion, repeat
+content, heterozygosity) and life-history modifiers (habitat variability,
+reproductive and larval mode, generation time, photosymbiosis). Beside each
+species it shows what the atlas itself contains for that species and taxon.
+
+Be clear about what it is. No study has validated any of these features as a
+predictor of priming outcome. The page is a **transparent, adjustable rubric**
+whose default weights encode a reading of the environmental-epigenetics
+literature; every weight, scoring rule, rationale, and source is on the page,
+the sliders let a reader change them, and the "anchor check" plots the rubric
+against the atlas's own *Improved* fractions so its agreement (or not) with
+the evidence is visible. Output is **rank and tier** relative to the panel;
+the numeric score is deliberately behind the breakdown. Assembly quality is a
+badge, not part of the score, because it governs whether a response can be
+characterised molecularly, not whether it occurs.
+
+- **Adding or correcting a species**: edit `genome_features.tsv` following
+  `GENOME_SCHEMA.md`. Every curated genome value needs a source in the
+  `sources` column; anything a source does not state is `not reported` and the
+  page imputes it from the taxon mean, flagged as such. `not reported` is never
+  filled in from a congener — the *Tigriopus japonicus* row shows how to note a
+  congener's value without adopting it.
+- **Changing the rubric**: edit `priming_model.json`. Weights must sum to 1 and
+  every scoring level must be an allowed schema value; `build_predictor.py`
+  refuses to build otherwise. Record weight changes in `CHANGELOG.md` with the
+  reasoning.
+- **Verification status**: the initial 22-species panel (2026-09-17) was
+  curated in one pass from genome and methylome papers. Treat each value as
+  provisional until checked against the full text, exactly as with atlas rows.
 
 ## Repository maintenance
 

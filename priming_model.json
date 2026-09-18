@@ -1,0 +1,128 @@
+{
+  "version": "0.1.0",
+  "name": "Priming likelihood rubric",
+  "framing": "A transparent, adjustable rubric for ranking marine invertebrate species by the relative likelihood that a sublethal priming exposure produces a favourable later-life or offspring response. It is hypothesis-generating. No study has validated any of these features as a predictor of priming outcome; the default weights encode the Roberts Lab's reading of the environmental-epigenetics literature and are meant to be argued with. Rank and tier are relative to the species panel on this page, not absolute probabilities.",
+  "tiers": ["Higher", "Moderate", "Lower"],
+  "imputation": {
+    "rule": "taxon-mean",
+    "min_known": 2,
+    "fallback": 0.5,
+    "description": "A feature marked 'not reported' takes the mean score of the other panel species in the same taxon when at least two of them have a curated value, otherwise 0.5. Imputed features are drawn hatched in the breakdown and excluded from the coverage figure."
+  },
+  "features": [
+    {
+      "id": "machinery",
+      "group": "genome",
+      "label": "DNA methylation machinery",
+      "weight": 0.15,
+      "type": "machinery",
+      "fields": ["dnmt1", "dnmt3", "tet"],
+      "rule": {"dnmt3": {"Present": 0.8, "Absent": 0.2, "not reported": 0.5}, "dnmt1": {"Present": 0.1, "Absent": -0.15}, "tet": {"Present": 0.1, "Absent": 0}},
+      "rationale": "A complete write-and-erase toolkit (DNMT1 maintenance, DNMT3 de novo, TET demethylation) is the minimum for an environmentally induced, mitotically heritable methylation state. Lineages that have lost DNMT3 or DNMT1 have little or no CpG methylation and would need a different memory substrate.",
+      "sources": ["10.1126/science.1186366", "10.1016/j.jmb.2019.11.003", "10.3389/fphys.2011.00116"]
+    },
+    {
+      "id": "pattern",
+      "group": "genome",
+      "label": "Genome-wide methylation pattern",
+      "weight": 0.15,
+      "type": "levels",
+      "field": "methylation_pattern",
+      "levels": {"Mosaic gene-body": 1.0, "Global": 0.7, "Low/absent": 0.1},
+      "rationale": "Mosaic gene-body methylation, the invertebrate norm, leaves most of the genome unmethylated and available for environmentally responsive change, and gene-body methylation correlates with expression stability and plasticity in bivalves and corals. A low or absent methylome removes this substrate entirely.",
+      "sources": ["10.3389/fphys.2011.00116", "10.7717/peerj.215", "10.1073/pnas.1813749115", "10.1146/annurev-marine-010318-095114"]
+    },
+    {
+      "id": "expansion",
+      "group": "genome",
+      "label": "Stress / immune gene family expansion",
+      "weight": 0.15,
+      "type": "levels",
+      "field": "stress_immune_expansion",
+      "levels": {"Expanded": 1.0, "Baseline": 0.5, "Contracted": 0.2},
+      "rationale": "Expanded HSP70, inhibitor-of-apoptosis, antioxidant, and pattern-recognition receptor families give a species more regulatory range to tune after a priming exposure. The oyster and sea urchin genomes are the type cases; immune priming in these taxa is a large part of the atlas.",
+      "sources": ["10.1038/nature11413", "10.1126/science.1133609", "10.1038/s41598-018-34459-8"]
+    },
+    {
+      "id": "te",
+      "group": "genome",
+      "label": "Repeat / transposable element fraction",
+      "weight": 0.07,
+      "type": "bands",
+      "field": "te_fraction_pct",
+      "bands": [[20, 0.3], [35, 0.6], [50, 0.85], [null, 1.0]],
+      "rationale": "Transposable elements are a major target of epigenetic silencing and a source of stress-responsive regulatory sequence; a repeat-rich genome offers more substrate for induced regulatory change. Weak, indirect evidence, hence the low default weight.",
+      "sources": ["10.1146/annurev-marine-010318-095114"]
+    },
+    {
+      "id": "het",
+      "group": "genome",
+      "label": "Heterozygosity",
+      "weight": 0.08,
+      "type": "levels",
+      "field": "heterozygosity_class",
+      "levels": {"High": 1.0, "Moderate": 0.6, "Low": 0.3},
+      "rationale": "Highly polymorphic genomes (oysters, mussels) carry more standing regulatory variation for a plastic response to act on, and genotype-by-environment interaction is a recurring finding in conditioning experiments. Confounded with population size and history.",
+      "sources": ["10.1038/nature11413", "10.1186/s13059-020-02180-3"]
+    },
+    {
+      "id": "habitat",
+      "group": "life history",
+      "label": "Habitat variability",
+      "weight": 0.14,
+      "type": "levels",
+      "field": "habitat_variability",
+      "levels": {"Intertidal/estuarine": 1.0, "Shallow subtidal": 0.6, "Subtidal/stable": 0.3},
+      "rationale": "Species that evolved in highly variable intertidal or estuarine environments are expected to have selected for plasticity and for the epigenetic mechanisms that support it; stable-environment specialists are expected to be canalised.",
+      "sources": ["10.3389/fphys.2011.00116", "10.1146/annurev-marine-010318-095114"]
+    },
+    {
+      "id": "repro",
+      "group": "life history",
+      "label": "Reproductive mode",
+      "weight": 0.08,
+      "type": "levels",
+      "field": "reproductive_mode",
+      "levels": {"Brooder": 0.9, "Both/variable": 0.75, "Broadcast spawner": 0.6},
+      "rationale": "Brooding extends parent-offspring contact and provisioning, giving more routes for a parental exposure to shape offspring (and, in corals, to pass on a conditioned symbiont community). Broadcast spawners can still show parental priming, as the oyster literature shows, so the gap is kept modest.",
+      "sources": ["10.1242/jeb.239319", "10.1146/annurev-marine-010318-095114"]
+    },
+    {
+      "id": "larval",
+      "group": "life history",
+      "label": "Larval mode",
+      "weight": 0.05,
+      "type": "levels",
+      "field": "larval_mode",
+      "levels": {"Planktotrophic": 0.7, "Lecithotrophic": 0.6, "Direct development": 0.5},
+      "rationale": "A long feeding larval phase is itself a wide priming window and a stage where most atlas experiments assess outcomes. The weakest feature in the rubric and weighted accordingly.",
+      "sources": []
+    },
+    {
+      "id": "gen",
+      "group": "life history",
+      "label": "Generation time",
+      "weight": 0.07,
+      "type": "levels",
+      "field": "generation_time",
+      "levels": {"<1 yr": 1.0, "1-2 yr": 0.8, "2-5 yr": 0.5, ">5 yr": 0.3},
+      "rationale": "Short generations make transgenerational memory ecologically useful (the environment a parent experiences predicts the offspring's) and make it demonstrable in practice. Long-lived species may rely more on within-generation acclimatisation.",
+      "sources": ["10.1146/annurev-marine-010318-095114"]
+    },
+    {
+      "id": "symb",
+      "group": "life history",
+      "label": "Photosymbiosis",
+      "weight": 0.06,
+      "type": "levels",
+      "field": "symbiosis",
+      "levels": {"Obligate photosymbiont": 1.0, "Facultative photosymbiont": 0.9, "None": 0.6},
+      "rationale": "A symbiont community is an additional, fast-acting axis of plasticity: corals can shift Symbiodiniaceae composition after thermal stress and, where transmission is vertical, pass the conditioned community to offspring.",
+      "sources": ["10.1098/rspb.2006.3567", "10.1242/jeb.239319"]
+    }
+  ],
+  "tractability": {
+    "fields": ["assembly_level", "annotation"],
+    "description": "Assembly level and annotation availability are shown as a badge, not scored. They govern whether a priming response can be characterised molecularly, not whether it occurs."
+  }
+}
