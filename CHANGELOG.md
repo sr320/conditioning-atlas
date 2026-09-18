@@ -3,6 +3,49 @@
 Format: newest first. One entry per maintenance pass. See README.md § "Updating the
 atlas" for what a normal entry should record.
 
+## 2026-09-17 — Genome pipeline, phase 2 (computed machinery, methylation pattern, family sizes)
+
+- New scripts in `genomics/`: `fetch_annotations.py` (protein + CDS FASTA via
+  the NCBI Datasets REST API for the panel and four baseline species — human,
+  *Drosophila*, *Lottia*, *Branchiostoma*), `fetch_pfam.py` (16 Pfam profiles
+  from InterPro, 8 UniProt reference proteins), `domain_scan.py` (hmmsearch at
+  Pfam gathering thresholds), `machinery_calls.py`, `family_counts.py`,
+  `cpg_oe.py`, `cds_from_gff.py` (fallback CDS extraction), and a shared
+  `p2common.py`. `collect_derived.py` gained `--from-phase2`.
+- 11 of the 22 panel species have an NCBI proteome and were processed. 88
+  derived rows collected; the build fills 55 `not reported` cells from them.
+  Calls that require a complete assembly (gene absence, family
+  expansion/contraction) are withheld as `not reported` for the five species
+  whose BUSCO completeness is unknown until BUSCO runs on the server.
+- `scripts/build_predictor.py` now merges `genome_derived.tsv` (curated over
+  computed over imputed), validates computed values against the schema, and
+  prints curated/computed disagreements. The page draws computed features
+  striped, splits coverage into curated / computed / imputed, shows a BUSCO
+  badge, and documents the computed class in its method section.
+  `GENOME_SCHEMA.md` gained a "Computed values" section.
+- Validation against species with curated values: *C. gigas* DNMT1/DNMT3
+  present and Mosaic gene-body reproduced; HSP70 110 and IAP 61 genes vs 88 and
+  48 in Zhang et al. 2012 (Roslin RefSeq annotation vs 2012 gene models; same
+  Expanded call; curated numbers kept, disagreement printed at build).
+  *S. purpuratus* TIR 196 / NACHT 241 / SRCR 368 vs 222 / 203 / 218 in the
+  2006 genome paper. Baselines: human → Global CpG pattern, all machinery
+  present; *Drosophila* → Low/absent, only DNMT2 and TET. The CpG classifier
+  was corrected during this check: its first rule called human "mosaic"
+  because both human modes are depleted; the rule now requires an
+  unmethylated mode ≥ 0.75 for Mosaic gene-body.
+- **Correction to `genome_features.tsv`**: *Tigriopus californicus* had been
+  coded DNMT1 Absent, DNMT3 Absent, methylation Low/absent, citing Barreto et
+  al. 2018. On checking, that paper (a mitonuclear-coevolution genome paper)
+  does not state this, and its proteome carries two canonical DNMT1 genes
+  (RFD + BAH + methylase domains, best hit human DNMT1) plus DNMT2 and TET,
+  with no DNMT3 detected. The three curated values were withdrawn to
+  `not reported`; computed values now supply DNMT1 Present, TET Present,
+  methylation Low/absent (unimodal CpG O/E, mean 0.84), with DNMT3 absence
+  withheld pending BUSCO. The misattribution came from the curator's memory,
+  which is exactly what the sourcing rule exists to catch.
+- Anchor check moved from Spearman ρ 0.19 to 0.22 across 16 species after
+  computed values were merged; still a plausibility display, not validation.
+
 ## 2026-09-17 — Genome pipeline, phase 1 (accessions and quality gate)
 
 - Goal: replace taxon-level imputation on the Priming likelihood page with

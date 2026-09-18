@@ -129,9 +129,11 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--from-ncbi", action="store_true")
     ap.add_argument("--from-busco", metavar="DIR")
+    ap.add_argument("--from-phase2", metavar="DIR",
+                    help="ingest DIR/*.derived.tsv written by machinery_calls.py, family_counts.py, cpg_oe.py")
     a = ap.parse_args()
-    if not (a.from_ncbi or a.from_busco):
-        ap.error("nothing to collect; pass --from-ncbi and/or --from-busco DIR")
+    if not (a.from_ncbi or a.from_busco or a.from_phase2):
+        ap.error("nothing to collect; pass --from-ncbi, --from-busco DIR and/or --from-phase2 DIR")
 
     panel = load_panel()
     merged = load_existing()
@@ -142,6 +144,17 @@ def main():
     if a.from_busco:
         print(f"BUSCO summaries in {a.from_busco}:")
         new += from_busco(panel, a.from_busco)
+    if a.from_phase2:
+        print(f"phase 2 derived files in {a.from_phase2}:")
+        for path in sorted(glob.glob(os.path.join(a.from_phase2, "*.derived.tsv"))):
+            with open(path, newline="") as fh:
+                rows = [r for r in csv.DictReader(fh, delimiter="\t") if r.get("species")]
+            missing = [k for k in HDR if rows and k not in rows[0]]
+            if missing:
+                print(f"  ! {path}: missing columns {missing}", file=sys.stderr)
+                continue
+            new += rows
+            print(f"  {os.path.basename(path)}: {len(rows)} rows")
     for r in new:
         merged[(r["species"], r["feature"], r["method"])] = r
 

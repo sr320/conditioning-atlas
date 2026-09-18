@@ -14,3 +14,4 @@ data/search/*_raw.json
 # genomics pipeline: downloaded assemblies and tool output live on the server, not in git
 genomics/data/
 genomics/results/
+genomics/db/

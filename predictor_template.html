@@ -104,6 +104,9 @@
   .trk{height:9px;background:var(--grid);border-radius:5px;position:relative;overflow:hidden}
   .fill{height:100%;border-radius:5px;background:var(--s450)}
   .fill.imp{background:repeating-linear-gradient(-45deg,var(--s350) 0 3px,transparent 3px 7px)}
+  .fill.comp{background:repeating-linear-gradient(90deg,var(--s450) 0 5px,var(--s150) 5px 7px)}
+  .trk .fill.comp.seg{position:absolute;top:0}
+  .basis{display:inline-block;font-size:9.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-left:6px;vertical-align:middle}
   .feat{display:grid;grid-template-columns:210px 1fr 250px;gap:12px;align-items:center;padding:7px 0;border-bottom:1px solid var(--grid)}
   .feat:last-child{border-bottom:0}
   .feat .lab{font-size:12.5px;color:var(--ink)}
@@ -182,7 +185,7 @@
 <div class="row2">
   <div class="card" id="selCard">
     <h2>Selected species</h2>
-    <p class="cap">Rank and tier first; the numeric score sits behind the breakdown. Each bar's <em>length</em> is the feature's weight and its <em>fill</em> is the species' score on that feature. Hatched bars are imputed from the taxon mean.</p>
+    <p class="cap">Rank and tier first; the numeric score sits behind the breakdown. Each bar's <em>length</em> is the feature's weight and its <em>fill</em> is the species' score on that feature. Solid bars are curated from the literature, striped bars are computed from the public assembly, hatched bars are imputed from the taxon mean.</p>
     <div id="sel"></div>
   </div>
   <div class="card" id="atlasCard">
@@ -291,14 +294,24 @@ function impute(f,r){
   return {s:MODEL.imputation.fallback,n:0};
 }
 function scoreRow(r){
-  const nw=normW();let total=0,cov=0;const parts=[];
+  const nw=normW();let total=0,cov=0,covComp=0;const parts=[];
   for(const f of MODEL.features){
     let raw=rawScore(f,r),imputed=false,n=0;
-    if(!raw){const i=impute(f,r);raw={s:i.s,txt:NR};imputed=true;n=i.n}else cov+=nw[f.id];
+    const flds=f.fields||[f.field];
+    const comp=r.computed?flds.filter(k=>r.computed[k]).map(k=>Object.assign({field:k},r.computed[k])):[];
+    const basis=!raw?"imputed":comp.length?"computed":"curated";
+    if(!raw){const i=impute(f,r);raw={s:i.s,txt:NR};imputed=true;n=i.n}
+    else if(basis==="computed")covComp+=nw[f.id];
+    else cov+=nw[f.id];
     const c=nw[f.id]*raw.s;total+=c;
-    parts.push({f,score:raw.s,txt:raw.txt,imputed,n,w:nw[f.id],contrib:c});
+    parts.push({f,score:raw.s,txt:raw.txt,imputed,basis,comp,n,w:nw[f.id],contrib:c});
   }
-  return {total,cov,parts};
+  return {total,cov,covComp,parts};
+}
+/* two-segment coverage bar: solid = curated, striped = computed, remainder = imputed */
+function covBar(sc){
+  const cur=Math.round(sc.cov*100),comp=Math.round((sc.covComp||0)*100);
+  return `<div class="trk"><div class="fill" style="width:${cur}%"></div><div class="fill comp seg" style="left:${cur}%;width:${comp}%"></div></div>`;
 }
 function tierOf(rank,n){const q=rank/n;return q<=1/3?MODEL.tiers[0]:q<=2/3?MODEL.tiers[1]:MODEL.tiers[2]}
 function ranked(){
@@ -336,6 +349,7 @@ function badges(r){
   if(r.annotation==="Yes")b+=`<span class="badge ok">annotated</span>`;
   else if(r.annotation==="No")b+=`<span class="badge">no annotation</span>`;
   if(r.genome_size_mb!==NR)b+=`<span class="badge">${esc(r.genome_size_mb)} Mb</span>`;
+  if(r.busco)b+=`<span class="badge ${r.busco>=90?"ok":""}" title="BUSCO completeness, best available report">BUSCO ${r.busco.toFixed(1)}%</span>`;
   if(r.assembly_accession&&r.assembly_accession!==NR)b+=`<a class="badge" href="https://www.ncbi.nlm.nih.gov/datasets/genome/${esc(r.assembly_accession)}/" target="_blank" rel="noopener">${esc(r.assembly_accession)}</a>`;
   return b;
 }
@@ -353,7 +367,7 @@ function renderRank(){
       <td class="sp">${esc(r.species)}<small>${esc(r.common_name)}</small></td>
       <td>${esc(r.taxon)}</td>
       <td><span class="pill tier-${x.tier}">${x.tier}</span></td>
-      <td><div class="cov"><div class="trk"><div class="fill" style="width:${Math.round(x.cov*100)}%"></div></div><span>${Math.round(x.cov*100)}%</span></div></td>
+      <td><div class="cov">${covBar(x)}<span>${Math.round(x.cov*100)+Math.round((x.covComp||0)*100)}%</span></div></td>
       <td>${r.assembly_level==="None"?'<span class="badge">none</span>':r.assembly_level===NR?'<span class="badge">not curated</span>':`<span class="badge ${r.assembly_level==="Chromosome"?"ok":""}">${esc(r.assembly_level)}</span>`}</td>
       <td class="num">${r.atlas_idx.length||'<span style="color:var(--muted)">0</span>'}</td></tr>`;
   }
@@ -369,18 +383,19 @@ function breakdown(sc,showTotal){
     const trk=Math.round(p.w/wmax*100),fill=Math.round(p.score*100);
     const val=p.imputed
       ?`not reported · imputed ${p.n?`from ${p.n} panel species in the same taxon`:"at neutral 0.5"}`
-      :esc(p.txt);
-    h+=`<div class="feat" data-f="${p.f.id}">
+      :esc(p.txt)+(p.basis==="computed"?`<span class="basis">computed${p.comp.length<(p.f.fields||[1]).length?" (part)":""}</span>`:"");
+    const ev=p.comp.map(c=>`${c.field.toUpperCase()}: ${c.evidence}`).join("\n");
+    h+=`<div class="feat" data-f="${p.f.id}" data-ev="${esc(ev)}" data-method="${esc(p.comp[0]?p.comp[0].method:"")}">
       <div class="lab">${esc(p.f.label)}<small>${esc(p.f.group)} · weight ${Math.round(p.w*100)}%</small></div>
-      <div class="trkwrap"><div class="trk" style="width:${trk}%"><div class="fill ${p.imputed?"imp":""}" style="width:${fill}%"></div></div></div>
+      <div class="trkwrap"><div class="trk" style="width:${trk}%"><div class="fill ${p.imputed?"imp":p.basis==="computed"?"comp":""}" style="width:${fill}%"></div></div></div>
       <div class="val ${p.imputed?"imp":""}">${val}</div></div>`;
   }
   if(showTotal){
     h+=`<details class="more"><summary>Show numeric score and contributions</summary>
-      <p class="note" style="margin:10px 0 6px">Score <b style="color:var(--ink)">${sc.total.toFixed(3)}</b> on a 0–1 scale (weighted sum; weights normalised to 1). Coverage ${Math.round(sc.cov*100)}% curated.</p>
+      <p class="note" style="margin:10px 0 6px">Score <b style="color:var(--ink)">${sc.total.toFixed(3)}</b> on a 0–1 scale (weighted sum; weights normalised to 1). Coverage ${Math.round(sc.cov*100)}% curated, ${Math.round((sc.covComp||0)*100)}% computed from the assembly, remainder imputed.</p>
       <table><thead><tr><th>Feature</th><th class="num">Weight</th><th class="num">Feature score</th><th class="num">Contribution</th><th>Basis</th></tr></thead><tbody>`;
     for(const p of sc.parts){
-      h+=`<tr><td>${esc(p.f.label)}</td><td class="num">${(p.w*100).toFixed(1)}%</td><td class="num">${p.score.toFixed(2)}</td><td class="num">${p.contrib.toFixed(3)}</td><td>${p.imputed?'<span style="color:var(--muted)">imputed</span>':"curated"}</td></tr>`;
+      h+=`<tr><td>${esc(p.f.label)}</td><td class="num">${(p.w*100).toFixed(1)}%</td><td class="num">${p.score.toFixed(2)}</td><td class="num">${p.contrib.toFixed(3)}</td><td>${p.imputed?'<span style="color:var(--muted)">imputed</span>':p.basis}</td></tr>`;
     }
     h+="</tbody></table></details>";
   }
@@ -389,7 +404,10 @@ function breakdown(sc,showTotal){
 function attachFeatTips(root){
   root.querySelectorAll(".feat").forEach(el=>{
     const f=MODEL.features.find(x=>x.id===el.dataset.f);
-    if(f)bind(el,`<b>${esc(f.label)}</b><div style="margin-top:4px">${esc(f.rationale)}</div>`);
+    if(!f)return;
+    let h=`<b>${esc(f.label)}</b><div style="margin-top:4px">${esc(f.rationale)}</div>`;
+    if(el.dataset.ev)h+=`<div style="margin-top:6px;color:var(--ink-2)"><b>Computed</b> · ${esc(el.dataset.method)}<br>${esc(el.dataset.ev).replace(/\n/g,"<br>")}</div>`;
+    bind(el,h);
   });
 }
 
@@ -402,7 +420,7 @@ function renderSelected(){
     <p class="spname">${esc(r.species)}</p>
     <p class="spmeta">${esc(r.common_name)} · ${esc(r.taxon)}${r.synonyms?` · also as <i>${esc(r.synonyms)}</i>`:""}</p>
     <div>${badges(r)}</div>
-    <div class="cov" style="margin-top:10px"><span>Coverage</span><div class="trk"><div class="fill" style="width:${Math.round(x.cov*100)}%"></div></div><span>${Math.round(x.cov*100)}% of the score rests on curated values</span></div>
+    <div class="cov" style="margin-top:10px"><span>Coverage</span>${covBar(x)}<span>${Math.round(x.cov*100)}% curated · ${Math.round((x.covComp||0)*100)}% computed from the assembly · ${Math.max(0,100-Math.round(x.cov*100)-Math.round((x.covComp||0)*100))}% imputed</span></div>
     <h3>Why it lands here</h3>${breakdown(x,true)}`;
   const extras=[];
   if(r.global_cpg_methylation_pct!==NR)extras.push(`global CpG methylation ${esc(r.global_cpg_methylation_pct)}%`);
@@ -583,7 +601,8 @@ function renderMethod(){
     h+=`<tr><td style="color:var(--ink)">${esc(f.label)}</td><td>${esc(f.group)}</td><td class="num">${Math.round(f.weight*100)}%</td><td>${sc}</td><td>${esc(f.rationale)}</td><td class="src">${f.sources.length?f.sources.map(doiLink).join("<br>"):'<span style="color:var(--muted)">—</span>'}</td></tr>`;
   }
   h+="</tbody></table>";
-  h+=`<h3>Imputation</h3><p class="note">${esc(MODEL.imputation.description)}</p>
+  h+=`<h3>Computed values</h3><p class="note">Where no paper states a genome feature, the repository's <a href="https://github.com/sr320/conditioning-atlas/tree/main/genomics">genomics pipeline</a> computes it from the public assembly: DNMT1/DNMT3/TET presence by Pfam domain architecture and best hit to human references; methylation pattern from the bimodality of CpG observed/expected across gene bodies; stress and immune family sizes by Pfam domain counts against a fixed baseline of human, <i>Drosophila</i>, <i>Lottia</i> and <i>Branchiostoma</i>. These values are striped in the breakdown, feed the score exactly like curated ones, and are recorded with method, tool version, accession and evidence in <a href="https://github.com/sr320/conditioning-atlas/blob/main/genome_derived.tsv">genome_derived.tsv</a>. Curated values always take precedence; calls that need a complete assembly (absence of a gene, family expansion) are withheld until BUSCO completeness is at least 90%.</p>
+      <h3>Imputation</h3><p class="note">${esc(MODEL.imputation.description)}</p>
       <h3>Tractability badge</h3><p class="note">${esc(MODEL.tractability.description)}</p>
       <h3>Tiers</h3><p class="note">${MODEL.tiers[0]}, ${MODEL.tiers[1]}, and ${MODEL.tiers[2]} are the top, middle, and bottom thirds of the panel by rank under the current weights. They are relative to this panel, so adding a species can move another species' tier.</p>
       <h3>Source files</h3><p class="note">Panel: <a href="https://github.com/sr320/conditioning-atlas/blob/main/genome_features.tsv">genome_features.tsv</a> (<a href="https://github.com/sr320/conditioning-atlas/blob/main/GENOME_SCHEMA.md">schema</a>). Rubric: <a href="https://github.com/sr320/conditioning-atlas/blob/main/priming_model.json">priming_model.json</a>. Additions and corrections are welcome as pull requests.</p>`;

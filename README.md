@@ -189,9 +189,19 @@ characterised molecularly, not whether it occurs.
   every scoring level must be an allowed schema value; `build_predictor.py`
   refuses to build otherwise. Record weight changes in `CHANGELOG.md` with the
   reasoning.
+- **Computed values**: where no paper states a genome feature, the pipeline in
+  `genomics/` computes it from the public assembly (methylation machinery by
+  Pfam domain architecture, methylation pattern from CpG observed/expected
+  bimodality, stress/immune family sizes by domain counts against a fixed
+  baseline). Results live in `genome_derived.tsv` with method, version,
+  accession, and evidence; the build fills `not reported` cells from them,
+  draws them striped on the page, and prints any disagreement with a curated
+  value. Curated always wins. See `genomics/README.md` for phases and status.
 - **Verification status**: the initial 22-species panel (2026-09-17) was
   curated in one pass from genome and methylome papers. Treat each value as
   provisional until checked against the full text, exactly as with atlas rows.
+  The pipeline already caught one: a *Tigriopus californicus* "DNMT1 absent"
+  entry whose cited paper did not say so (see `CHANGELOG.md`).
 
 ## Repository maintenance
 

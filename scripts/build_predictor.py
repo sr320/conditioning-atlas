@@ -168,11 +168,65 @@ def match_atlas(panel, atlas):
     return unmatched
 
 
+DERIVED_FIELDS = set(ALLOWED) | NUMERIC   # panel columns a computed value may fill
+
+
+def merge_derived(panel, path):
+    """Fill `not reported` panel cells from genome_derived.tsv (values computed from
+    the assemblies by genomics/). Curated values always win; a computed value that
+    disagrees with a curated one is reported, not applied. Each filled cell is
+    recorded in row["computed"][field] with its provenance so the page can show it
+    as a distinct basis. BUSCO completeness is carried separately for the badge."""
+    for r in panel:
+        r["computed"], r["busco"] = {}, None
+    if not os.path.exists(path):
+        return 0, []
+    with open(path, newline="") as fh:
+        derived = list(csv.DictReader(fh, delimiter="\t"))
+    by_species = {}
+    for d in derived:
+        by_species.setdefault(d["species"], []).append(d)
+    filled, conflicts = 0, []
+    for r in panel:
+        for d in by_species.get(r["species"], []):
+            f, v = d["feature"], d["value"].strip()
+            if f == "busco_complete_pct":
+                try:
+                    r["busco"] = max(r["busco"] or 0.0, float(v))
+                except ValueError:
+                    pass
+                continue
+            if f not in DERIVED_FIELDS or v == NR:
+                continue
+            if f in ALLOWED and v not in ALLOWED[f]:
+                fail(f"genome_derived.tsv: {r['species']} {f}={v!r} is not an allowed value")
+            if f in NUMERIC:
+                try:
+                    float(v)
+                except ValueError:
+                    fail(f"genome_derived.tsv: {r['species']} {f}={v!r} is not numeric")
+            if r[f] == NR:
+                if f in r["computed"]:
+                    continue  # first method listed wins; later methods for the same cell are ignored
+                r[f] = v
+                r["computed"][f] = {k: d.get(k, "") for k in ("value", "method", "tool_version", "database", "accession", "date", "evidence")}
+                filled += 1
+            elif r[f] != v:
+                conflicts.append((r["species"], f, r[f], v, d.get("method", "")))
+    return filled, conflicts
+
+
 def main():
     panel = load_panel(os.path.join(ROOT, "genome_features.tsv"))
     model = load_model(os.path.join(ROOT, "priming_model.json"))
     with open(os.path.join(ROOT, "merged.json")) as fh:
         atlas = json.load(fh)
+
+    filled, conflicts = merge_derived(panel, os.path.join(ROOT, "genome_derived.tsv"))
+    print(f"Computed values: {filled} cells filled from genome_derived.tsv"
+          + (f"; {len(conflicts)} curated/computed disagreements (curated kept):" if conflicts else ""))
+    for sp, f, cur, comp, method in conflicts:
+        print(f"  {sp}: {f} curated={cur!r} computed={comp!r} [{method}]")
 
     unmatched = match_atlas(panel, atlas)
     with_rows = sum(1 for r in panel if r["atlas_idx"])
@@ -190,8 +244,9 @@ def main():
 
     foot = (
         "The species panel is hand-curated from genome and methylome papers listed per species; every value is "
-        "traceable to a source in the row's `sources` field and anything not stated in a source is `not reported` "
-        "and imputed at taxon level (hatched in the breakdown). Life-history categories rest on standard natural "
+        "traceable to a source in the row's `sources` field. Cells no source states are filled, where possible, with "
+        "values computed from the public assembly by the repository's genomics pipeline (striped in the breakdown; "
+        f"{filled} cells at this build) and otherwise imputed at taxon level (hatched). Life-history categories rest on standard natural "
         "history. The rubric weights encode a reading of the environmental-epigenetics literature, not a fitted "
         "model, and rank and tier are relative to this panel only. The atlas evidence shown beside each species "
         "comes from the Conditioning Atlas's own rows and inherits their caveats. "

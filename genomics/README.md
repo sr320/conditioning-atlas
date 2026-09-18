@@ -23,11 +23,38 @@ overwrite `genome_features.tsv`; that file stays the literature record.
 
 | Phase | What | Feeds | Status |
 |---|---|---|---|
-| 1 | Resolve an NCBI accession per species; fetch genome, proteome, and annotation; run BUSCO (metazoa_odb10) as the quality gate | tractability badge; gates phases 2–4 | scaffold in place; BUSCO runs on server |
-| 2 | Methylation machinery (DNMT1/DNMT3/TET by Pfam domain architecture + reciprocal best hit + assembly-level search for absences), CpG observed/expected bimodality per gene body, Pfam domain counts for stress/immune families vs a fixed baseline panel | `dnmt1`, `dnmt3`, `tet`, `methylation_pattern`, `stress_immune_expansion`, `hsp70_count`, `iap_count` | planned |
+| 1 | Resolve an NCBI accession per species; fetch genome, proteome, and annotation; run BUSCO (metazoa_odb10) as the quality gate | tractability badge; gates phases 2–4 | accessions done (21/22); NCBI-reported BUSCO for 6 RefSeq species; our own BUSCO still to run on the server |
+| 2 | Methylation machinery (DNMT1/DNMT3/TET by Pfam domain architecture + phmmer best hit to human references), CpG observed/expected bimodality per gene, Pfam domain counts for stress/immune families vs a fixed baseline panel | `dnmt1`, `dnmt3`, `tet`, `methylation_pattern`, `stress_immune_expansion`, `hsp70_count`, `iap_count` | done for the 11 panel species with an NCBI proteome; absence and expansion calls withheld where BUSCO is unknown; assembly-level search for absences (miniprot) still to add |
 | 3 | Repeat fraction with RED (de novo, uniform across species), cross-checked against NCBI soft-masking for RefSeq assemblies | `te_fraction_pct` | planned |
 | 4 | Heterozygosity from a k-mer spectrum (GenomeScope 2) on one SRA Illumina library per species at ~30× | `heterozygosity_class` (thresholds set after seeing the oyster values) | planned |
-| 5 | Build and page integration: third bar style for computed values, coverage split into curated and computed, schema section | page | planned |
+| 5 | Build and page integration: third bar style for computed values, coverage split into curated and computed, schema section | page | done |
+
+## Running phase 2 (laptop-scale; needs HMMER, numpy, scikit-learn)
+
+```bash
+python3 genomics/fetch_annotations.py     # protein + CDS FASTA via the NCBI REST API, panel + baseline
+python3 genomics/fetch_pfam.py            # 16 Pfam profiles from InterPro + 8 UniProt reference proteins
+THREADS=6 python3 genomics/domain_scan.py # hmmsearch --cut_ga, one domtblout per proteome
+python3 genomics/machinery_calls.py
+python3 genomics/family_counts.py
+python3 genomics/cpg_oe.py
+python3 genomics/collect_derived.py --from-phase2 genomics/results/phase2
+python3 scripts/build_predictor.py        # merges computed values and prints curated/computed disagreements
+```
+
+If an NCBI download lacks `cds_from_genomic.fna` (the Roslin *C. gigas*
+RefSeq does), fetch the genome FASTA and GFF3 for that accession into
+`genomics/data/<ACC>/` and run `python3 genomics/cds_from_gff.py <ACC>`.
+
+Phase 2 validation, 2026-09-17: human → DNMT1/3A/3B/TET1-3 present, Global
+CpG pattern; *Drosophila* → only DNMT2 and TET, Low/absent pattern; *C. gigas*
+→ DNMT1/DNMT3/TET present, Mosaic gene-body, Expanded (HSP70 110, IAP 61 vs
+88 and 48 in Zhang et al. 2012 — same conclusion from a different
+annotation); *S. purpuratus* → Expanded with TIR 196 / NACHT 241 / SRCR 368
+against 222 / 203 / 218 in the 2006 genome paper. The *T. californicus*
+proteome carries two canonical DNMT1 genes, contradicting a curated
+"Absent" that on re-reading was not supported by its cited source; the
+curated value was withdrawn (see CHANGELOG).
 
 Validation set for phases 2–4: the species that already carry curated values
 (*C. gigas*: DNMT1/DNMT3 present, 88 HSP70, 48 IAP, 36% repeats, mosaic

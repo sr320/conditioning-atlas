@@ -1,0 +1,17 @@
+accession	name	group	purpose
+PF00145	DNA_methylase	machinery	C-5 cytosine methyltransferase catalytic domain (DNMT1, DNMT3, DNMT2/TRDMT1)
+PF01426	BAH	machinery	DNMT1 architecture marker
+PF12047	DNMT1-RFD	machinery	DNMT1 architecture marker (replication foci domain)
+PF00855	PWWP	machinery	DNMT3 architecture marker
+PF17980	ADD_DNMT3	machinery	DNMT3 architecture marker (ADD domain)
+PF12851	Tet_JBP	machinery	TET / JBP 2OG-Fe(II) oxygenase domain
+PF00012	HSP70	stress	HSP70 family
+PF00653	BIR	stress	Inhibitor-of-apoptosis (IAP) BIR repeat
+PF01582	TIR	immune	TIR domain (Toll-like receptors, adaptors)
+PF05729	NACHT	immune	NACHT domain (NOD-like receptors)
+PF00530	SRCR	immune	Scavenger receptor cysteine-rich domain
+PF00080	Sod_Cu	antioxidant	Cu/Zn superoxide dismutase
+PF02777	Sod_Fe_C	antioxidant	Fe/Mn superoxide dismutase C-terminal domain
+PF00255	GSHPx	antioxidant	Glutathione peroxidase
+PF00578	AhpC-TSA	antioxidant	Peroxiredoxin / thioredoxin-dependent peroxidase
+PF00199	Catalase	antioxidant	Catalase

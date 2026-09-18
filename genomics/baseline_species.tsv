@@ -1,0 +1,5 @@
+species	accession	role_note
+Homo sapiens	GCF_000001405.40	vertebrate baseline (global methylation, no HSP70/IAP expansion)
+Drosophila melanogaster	GCF_000001215.4	ecdysozoan baseline (DNMT3 lost, near-zero methylation)
+Lottia gigantea	GCF_000327385.1	non-bivalve mollusc baseline
+Branchiostoma floridae	GCF_000003815.2	invertebrate chordate baseline
