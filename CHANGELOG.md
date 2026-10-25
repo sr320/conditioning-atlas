@@ -3,6 +3,61 @@
 Format: newest first. One entry per maintenance pass. See README.md § "Updating the
 atlas" for what a normal entry should record.
 
+## 2026-10-25 — Second literature sweep (June–October 2026)
+
+- Screened papers entered or published since the 2026-08-04 build, in the same
+  four topic pulls as the initial sweep (bivalve temperature/pH,
+  coral/cnidarian, immune priming, hypoxia/salinity/pollutant/other taxa)
+  against PubMed, Consensus and scite. PubMed's date filters proved
+  unreliable for this window, and several journals and preprint servers are
+  not indexed there, so Consensus and scite supplied many of the hits. A few
+  qualifying papers from March–May 2026 that the first sweep missed were
+  picked up too. All candidate DOIs were confirmed in Crossref.
+- 117 unique papers screened: 34 met all four inclusion criteria on the
+  abstract, 19 need full text or a scope decision, 64 failed.
+- **Added 29 rows from 27 peer-reviewed papers** (109 → 138 experiments).
+  Zhu_2026a/b (within-generation and maternal arms) and Coleman_2026a/b
+  (heat then copper, copper then heat) are two experiments each.
+  Rows were added to `rows_bivalve_temp_ph.tsv` (7), `rows_coral.tsv` (4),
+  `rows_immune.tsv` (8) and `rows_other.tsv` (10).
+- Full text was read for 10 of the 27 papers (11 rows); the rest are
+  `Abstract only`, because Elsevier, Springer and MDPI pages refused automated
+  access even for open-access articles. Those rows leave dose, duration,
+  persistence and replication as `not reported` where the abstract is silent.
+  They are the first candidates for a manual full-text pass.
+- **Schema convention, needs a decision:** 10 abstract-only rows have
+  `conditioning_stage` = `not reported`, which is outside the field's
+  controlled list. The abstracts do not state the stage and the
+  never-infer rule takes precedence; three stages first guessed during
+  extraction (Setyono_2026, Thyrring_2026, Su_2026) and two guessed assay
+  types (Sun_2026, Yang_2026 `molecular_layers`) were reset to
+  `not reported`, with the reason in `notes`. Janssens_2026 uses
+  `Methylation (global %)`, following the Lee_2023 precedent of a
+  methylation label not on the list.
+- Relationships recorded in `notes`: Shen_2026 is the F1 follow-up from the
+  same abalone lab and strain as Shen_2022, but the paper does not say it is
+  the same cohort and its oxygen levels differ (2–3 vs ~4 mg/L). Glass_2026
+  follows Glass_2023. Hossain_2026 is from the same group as
+  de_Kantzow_2023a/b. Monti_2026 was extracted from its bioRxiv preprint
+  (10.64898/2026.04.07.716734); numbers may differ in the journal version.
+- Judgement calls to review: Ananda_2026 is kept for its vaccine-only arm (oral
+  formalin-killed *V. parahaemolyticus*); its dietary plant-extract arm alone
+  would fail on the excluded_immune.tsv precedents. Coleman_2026b's 60 mg/L
+  copper "priming" dose may not have been sublethal. Mascitelli_2026's thermal,
+  H2O2 and combined arms share one control and one challenge, so they are one
+  row with stressor_category `Multiple`.
+- 64 screened-out papers appended to the four `excluded_*.tsv` files with
+  one-line reasons.
+- **Held for review, not in the atlas:** 7 preprints that meet the criteria on
+  their abstracts (none had a peer-reviewed version in Crossref on
+  2026-10-25) and the 19 undecided papers. They are listed in
+  `pending_review.tsv` with what each needs. `merge_rows.py` ignores that file.
+- Editorial notices: checked in scite for every new DOI except Zhu_2026
+  (not indexed, `Not checked`); none found.
+- Rebuilt all deliverables. LibreOffice was not available, so the workbook's
+  "Coverage gaps" formulas have no cached values until the file is opened and
+  saved once in Excel or LibreOffice.
+
 ## 2026-09-17 — Genome pipeline, phase 2 (computed machinery, methylation pattern, family sizes)
 
 - New scripts in `genomics/`: `fetch_annotations.py` (protein + CDS FASTA via
