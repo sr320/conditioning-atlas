@@ -100,7 +100,11 @@
   .spname{font-size:19px;font-style:italic;color:var(--ink);margin:0}
   .spmeta{color:var(--ink-2);font-size:12.5px;margin:2px 0 8px}
   .cov{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--ink-2);margin:6px 0 4px}
-  .cov .trk{flex:0 0 140px}
+  .cov .trk{flex:0 0 140px;width:140px;min-width:140px}
+  /* Safari ignores flex-basis when sizing table columns; the explicit width keeps the
+     Coverage column wide enough for its bar. Below ~1100px the ranking table is wider
+     than its card, so let it scroll sideways instead of spilling out. */
+  @media(max-width:1100px){#rank{overflow-x:auto}}
   .trk{height:9px;background:var(--grid);border-radius:5px;position:relative;overflow:hidden}
   .fill{height:100%;border-radius:5px;background:var(--s450)}
   .fill.imp{background:repeating-linear-gradient(-45deg,var(--s350) 0 3px,transparent 3px 7px)}
