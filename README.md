@@ -36,6 +36,9 @@ published through GitHub Pages from `docs/index.html`.
 | `CHANGELOG.md` | One entry per maintenance pass: what was added, what was corrected, and why. | Yes — append, don't rewrite history |
 | `LICENSE` | Creative Commons Attribution 4.0 International license covering this repository. | No — legal text |
 | `scripts/` | The five-step build pipeline (below). | Yes |
+| `sweep/` | The weekly automated literature sweep: search terms, screening prompt, and scripts. See [`sweep/README.md`](sweep/README.md). | Yes |
+| `sweep_state/seen.tsv`, `sweep_state/last_run.json` | Every DOI the weekly sweep has screened, and its last search window. | Only to correct a sweep decision |
+| `sweep_runs/<run>/` | One sweep run's candidates, model decisions, and the exact prompt used, kept for audit. | **No — generated** |
 
 The rule of thumb: if a file's row above says "generated," don't hand-edit it —
 your edit will be silently overwritten the next time someone runs the
@@ -116,6 +119,17 @@ once in Excel or LibreOffice.
    multiple experiments — just make sure that's actually true).
 7. Add an entry to `CHANGELOG.md` (see format below) and re-send the two
    deliverables (`Conditioning_Atlas.xlsx`, `Conditioning_Atlas_dashboard.html`).
+
+### The weekly automated sweep
+
+The `Weekly literature sweep` workflow runs every Monday. It searches Europe
+PMC, PubMed and OpenAlex for papers from the last 14 days, and Claude screens
+them against the inclusion criteria. Exclusions are appended to
+`excluded_*.tsv`, and includes and holds to `pending_review.tsv`. The
+workflow opens a pull request for review and adds no rows to `rows_*.tsv`:
+extracting the screened includes is still done by hand, following the steps
+above. [`sweep/README.md`](sweep/README.md) covers how it works, the setup it
+needs, and its backtest against the October 2026 manual sweep.
 
 ### Correcting an existing row
 

@@ -59,6 +59,12 @@ def main():
         "risk-of-bias assessment. Treat it as a working lab resource and the scaffold for a real review. "
         f"{len(rows)} experiments · {npap} papers · built {datetime.date.today().isoformat()}."
     )
+    last_run = os.path.join(ROOT, "sweep_state", "last_run.json")
+    if os.path.exists(last_run):
+        with open(last_run) as fh:
+            through = json.load(fh)["until"]
+        foot += (f" New literature screened through {through} by the weekly automated sweep; screened "
+                 "papers awaiting extraction are listed in the repository's pending_review.tsv.")
 
     tpl_path = os.path.join(ROOT, "dashboard_template.html")
     with open(tpl_path) as fh:

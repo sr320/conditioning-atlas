@@ -1,0 +1,129 @@
+name: Weekly literature sweep
+
+# Phase 1 of WEEKLY_SWEEP_PLAN.md: search, screen with the Claude API, record
+# the decisions, rebuild the deliverables, and open a pull request for a
+# person to review. Nothing is merged automatically.
+#
+# Needs the repository secret ANTHROPIC_API_KEY. Optional: secret
+# OPENALEX_API_KEY (without it OpenAlex shares a $0.10/day budget per IP) and
+# variable CONTACT_EMAIL (OpenAlex/NCBI polite pools). Settings > Actions >
+# General must allow GitHub Actions to create pull requests.
+
+on:
+  schedule:
+    - cron: "0 14 * * 1"  # Mondays 14:00 UTC (06:00 PST / 07:00 PDT)
+  workflow_dispatch:
+    inputs:
+      since:
+        description: "Window start, YYYY-MM-DD (default: 14 days before 'until')"
+        required: false
+      until:
+        description: "Window end, YYYY-MM-DD (default: today)"
+        required: false
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: weekly-sweep
+  cancel-in-progress: false
+
+jobs:
+  sweep:
+    runs-on: ubuntu-latest
+    # Batches usually finish within an hour; GitHub caps a job at 6 h.
+    timeout-minutes: 300
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.13"
+          cache: pip
+
+      - name: Install Python dependencies
+        run: python -m pip install -r requirements.txt -r sweep/requirements.txt
+
+      - name: Pick the search window
+        id: win
+        env:
+          IN_SINCE: ${{ inputs.since }}
+          IN_UNTIL: ${{ inputs.until }}
+        run: |
+          until="${IN_UNTIL:-$(date -u +%F)}"
+          since="${IN_SINCE:-$(date -u -d "$until - 14 days" +%F)}"
+          echo "since=$since" >> "$GITHUB_OUTPUT"
+          echo "until=$until" >> "$GITHUB_OUTPUT"
+          echo "run_id=$(date -u -d "$until" +%G-W%V)" >> "$GITHUB_OUTPUT"
+
+      - name: Discover candidate papers
+        env:
+          CONTACT_EMAIL: ${{ vars.CONTACT_EMAIL }}
+          OPENALEX_API_KEY: ${{ secrets.OPENALEX_API_KEY }}
+        run: >
+          python -m sweep.discover --since "${{ steps.win.outputs.since }}"
+          --until "${{ steps.win.outputs.until }}" --run-id "${{ steps.win.outputs.run_id }}"
+
+      - name: Screen candidates (Message Batches)
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: python -m sweep.screen --run-id "${{ steps.win.outputs.run_id }}" --max 400
+
+      - name: Record decisions
+        id: write
+        run: |
+          python -m sweep.write --run-id "${{ steps.win.outputs.run_id }}"
+          if [ -f "sweep_runs/${{ steps.win.outputs.run_id }}/pr_body.md" ]; then
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "No new papers this week; no pull request." >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Install LibreOffice for workbook recalculation
+        if: steps.write.outputs.changed == 'true'
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y -q --no-install-recommends libreoffice-calc
+
+      # A pull request opened with GITHUB_TOKEN does not trigger validate.yml,
+      # so the same build and checks run here before the PR is opened.
+      - name: Rebuild deliverables
+        if: steps.write.outputs.changed == 'true'
+        run: |
+          python scripts/merge_rows.py
+          python scripts/build_xlsx.py
+          python scripts/recalc_xlsx.py Conditioning_Atlas.xlsx
+          python scripts/build_dashboard.py
+          python scripts/build_predictor.py
+          cmp Conditioning_Atlas_dashboard.html docs/index.html
+          cmp Priming_Likelihood.html docs/priming-likelihood.html
+
+      - name: Open or update the pull request
+        if: steps.write.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RUN_ID: ${{ steps.win.outputs.run_id }}
+          SINCE: ${{ steps.win.outputs.since }}
+          UNTIL: ${{ steps.win.outputs.until }}
+        run: |
+          branch="sweep/$RUN_ID"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git switch -c "$branch"
+          git add -A
+          git commit -q -m "Weekly sweep $RUN_ID: screen $SINCE to $UNTIL" \
+                        -m "Automated screening only (phase 1); see sweep_runs/$RUN_ID/pr_body.md."
+          git push --force -u origin "$branch"
+          body="sweep_runs/$RUN_ID/pr_body.md"
+          if gh pr view "$branch" --json state -q .state 2>/dev/null | grep -q OPEN; then
+            gh pr edit "$branch" --body-file "$body"
+          else
+            gh pr create --base main --head "$branch" \
+              --title "Weekly literature sweep $RUN_ID ($SINCE to $UNTIL)" --body-file "$body"
+          fi
+          cat "$body" >> "$GITHUB_STEP_SUMMARY"

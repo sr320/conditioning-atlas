@@ -27,6 +27,11 @@ def norm_doi(s: str | None) -> str:
     return m.group(0).rstrip(".;,").lower() if m else ""
 
 
+def record_key(rec: dict) -> str:
+    """DOI, or a normalised-title key for the few records that have none."""
+    return rec.get("doi") or "title:" + re.sub(r"[^a-z0-9]", "", (rec.get("title") or "").lower())[:80]
+
+
 def _read(path: str, ref: str | None) -> str:
     """File contents from the working tree, or from a git ref when given."""
     if ref is None:
@@ -69,6 +74,8 @@ def known_dois(ref: str | None = None) -> dict[str, str]:
             d = norm_doi(row.get("doi"))
             if d:
                 known.setdefault(d, name)
+            if (row.get("key") or "").startswith("title:"):
+                known.setdefault(row["key"], name)
     return known
 
 

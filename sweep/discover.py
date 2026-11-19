@@ -28,7 +28,8 @@ import xml.etree.ElementTree as ET
 import httpx
 import yaml
 
-from sweep.common import RUNS, ROOT, USER_AGENT, CONTACT_EMAIL, known_dois, norm_doi, read_jsonl, write_jsonl
+from sweep.common import (RUNS, ROOT, USER_AGENT, CONTACT_EMAIL, known_dois, norm_doi, read_jsonl,
+                          record_key, write_jsonl)
 
 EPMC = "https://www.ebi.ac.uk/europepmc/webservices/rest/search"
 EUTILS = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils"
@@ -254,7 +255,7 @@ def merge(hits: list[dict]) -> list[dict]:
     longest abstract and every source that returned it."""
     by: dict[str, dict] = {}
     for h in hits:
-        key = h["doi"] or "title:" + re.sub(r"[^a-z0-9]", "", h["title"].lower())[:80]
+        key = record_key(h)
         if key not in by:
             by[key] = {**h, "sources": [h["source"]]}
             by[key].pop("source")
@@ -320,7 +321,7 @@ def main() -> None:
     for m in merged:
         text = f"{m['title']} {m['abstract']}"
         m["prefilter"] = bool(cond.search(text) and tax.search(text))
-        m["known_in"] = known.get(m["doi"], "")
+        m["known_in"] = known.get(record_key(m), "")
         if not m["prefilter"]:
             n_prefilter_drop += 1
         elif m["known_in"]:

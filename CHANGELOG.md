@@ -3,6 +3,23 @@
 Format: newest first. One entry per maintenance pass. See README.md § "Updating the
 atlas" for what a normal entry should record.
 
+## 2026-11-19 — Weekly automated literature sweep (phase 1: screening)
+
+- New `sweep/` pipeline and `Weekly literature sweep` workflow. Every Monday
+  the workflow searches Europe PMC, PubMed and OpenAlex for the last 14 days,
+  and Claude (`claude-opus-5-5`) screens the new papers from title and
+  abstract. Exclusions are appended to `excluded_*.tsv`, includes and holds
+  to `pending_review.tsv`, and every screened DOI to `sweep_state/seen.tsv`.
+  The workflow then opens a pull request. It adds no atlas rows: extraction
+  stays manual until a later phase.
+- Backtest against the 2026-10-25 manual sweep, reproduced from the
+  pre-sweep state: 23 of 27 included papers recovered (85%), and 16 of 17
+  shared exclusions agreed. About ten plausible inclusions turned up that
+  the manual sweep had not seen. Details and the remaining gaps are in
+  `sweep/README.md`.
+- `scripts/build_dashboard.py` adds a "screened through" date to the
+  dashboard footer once `sweep_state/last_run.json` exists.
+
 ## 2026-10-25 — Second literature sweep (June–October 2026)
 
 - Screened papers entered or published since the 2026-08-04 build, in the same

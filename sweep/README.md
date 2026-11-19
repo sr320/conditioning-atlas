@@ -1,13 +1,59 @@
 # Weekly sweep: discovery and screening
 
-This directory holds steps 1–3 of [`WEEKLY_SWEEP_PLAN.md`](../WEEKLY_SWEEP_PLAN.md):
+This directory holds phase 1 of [`WEEKLY_SWEEP_PLAN.md`](../WEEKLY_SWEEP_PLAN.md):
 
 1. Find candidate papers.
 2. Drop the ones the atlas already knows.
 3. Screen the rest against the inclusion criteria in `SCHEMA.md`.
+4. Record the decisions in the atlas's own files and open a pull request.
 
-Extraction, writing rows and opening the PR come later. Nothing here edits
-`rows_*.tsv` or `excluded_*.tsv` yet.
+Extraction is still done by a person, so nothing here writes to `rows_*.tsv`.
+
+## The weekly workflow
+
+`.github/workflows/weekly-sweep.yml` runs every Monday at 14:00 UTC. It can
+also be started by hand from the Actions tab, with an optional date window.
+
+**What it does:**
+
+1. Searches the last 14 days, which overlap the previous run.
+2. Screens the new papers with the Message Batches API. A cap of 400 papers
+   bounds the cost.
+3. Runs `sweep/write.py`, which routes each decision:
+
+   | Decision | Goes to |
+   |---|---|
+   | `exclude` | `excluded_<cluster>.tsv` |
+   | `include` | `pending_review.tsv`, as "Screened include, needs extraction" |
+   | `needs_full_text` | `pending_review.tsv`, as "Needs full text or scope call" |
+   | `preprint_hold` | `pending_review.tsv`, as "Preprint" |
+
+   Every screened paper is also added to `sweep_state/seen.tsv`, so it is
+   never screened twice.
+4. Drafts a `CHANGELOG.md` entry and rebuilds every deliverable, with
+   LibreOffice recalculating the workbook.
+5. Opens a pull request on `sweep/<ISO week>`. The PR body lists every kept
+   paper with the model's reason, and the exclusions in a collapsed list.
+
+A week with no new papers opens no PR. Nothing is ever merged automatically.
+
+**Reviewing a sweep PR.** Moving a paper you disagree with between files is
+enough. For example, cut its line from `excluded_*.tsv` and add it to
+`pending_review.tsv`. The next sweep will not screen it again, because it
+stays in `seen.tsv`.
+
+**Setup, once.**
+
+- **Secret `ANTHROPIC_API_KEY`** (required).
+- **Secret `OPENALEX_API_KEY`** (recommended). Without it, OpenAlex can run
+  out of budget partway through a week.
+- **Variable `CONTACT_EMAIL`.**
+- **Pull-request permission.** Under Settings → Actions → General → Workflow
+  permissions, tick "Allow GitHub Actions to create and approve pull
+  requests".
+- **Checks on sweep PRs.** A PR opened with the built-in token does not
+  trigger `validate.yml`, so the sweep job runs the same build and checks
+  itself before opening the PR.
 
 ## Setup
 
@@ -35,6 +81,7 @@ uv pip install --python .venv/bin/python -r requirements.txt -r sweep/requiremen
 .venv/bin/python -m sweep.discover --since 2026-11-01 --until 2026-11-19 --run-id 2026-W47
 .venv/bin/python -m sweep.screen   --run-id 2026-W47            # Message Batches, 50% cheaper
 .venv/bin/python -m sweep.screen   --run-id 2026-W47 --direct   # concurrent calls, for quick iteration
+.venv/bin/python -m sweep.write    --run-id 2026-W47            # edits excluded_*, pending_review, seen, CHANGELOG
 ```
 
 Each run writes its files to `sweep_runs/<run_id>/`:

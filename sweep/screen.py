@@ -38,10 +38,12 @@ SCHEMA = {
         "primary_empirical": YNU,
         "decision": {"type": "string", "enum": ["include", "exclude", "needs_full_text", "preprint_hold"]},
         "cluster": {"type": "string", "enum": ["bivalve_temp_ph", "coral", "immune", "other"]},
+        "species": {"type": "string"},
+        "stressor": {"type": "string"},
         "reason": {"type": "string"},
     },
     "required": ["marine_invertebrate", "priming_exposure", "later_outcome", "primary_empirical",
-                 "decision", "cluster", "reason"],
+                 "decision", "cluster", "species", "stressor", "reason"],
     "additionalProperties": False,
 }
 
@@ -153,12 +155,18 @@ def main() -> None:
     ap.add_argument("--precedent-ref", default=None)
     ap.add_argument("--limit", type=int, default=0, help="screen only the first N (testing)")
     ap.add_argument("--rescreen", action="store_true", help="ignore decisions already in this run")
+    ap.add_argument("--max", type=int, default=400, help="spend cap: screen at most this many papers")
     a = ap.parse_args()
 
     run = RUNS / a.run_id
     cands = read_jsonl(run / "candidates.jsonl")
     if a.limit:
         cands = cands[:a.limit]
+    if a.max and len(cands) > a.max:
+        # Spend cap. Papers left over are not marked seen, so next week's
+        # overlapping window picks them up.
+        print(f"  {len(cands)} candidates exceeds --max {a.max}; screening the first {a.max}", file=sys.stderr)
+        cands = cands[:a.max]
     if not cands:
         print("no candidates"); return
     system = build_system(a.precedent_ref)

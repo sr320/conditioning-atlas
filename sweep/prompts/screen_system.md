@@ -48,7 +48,9 @@ has already made; follow them where a paper resembles one.
 Give each criterion `yes`, `no` or `unclear`, then the decision, the
 cluster the paper belongs to, and one line of reasoning that names the
 criterion that decided it. Write the reason in the style of the precedents
-below.
+below. Also give the species (Latin binomials as the paper states them,
+separated by `; `) and the conditioning stressor in a few words, or
+`not reported` when the title and abstract do not say.
 
 Clusters: `bivalve_temp_ph` (bivalves under temperature or pH/OA),
 `coral` (corals and other cnidarians, any stressor except pathogens),
