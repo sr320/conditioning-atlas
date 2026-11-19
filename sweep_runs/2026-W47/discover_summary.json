@@ -1,0 +1,16 @@
+{
+  "run_id": "2026-W47",
+  "since": "2026-11-05",
+  "until": "2026-11-19",
+  "known_ref": null,
+  "per_source": {
+    "europepmc": 28,
+    "pubmed": 24,
+    "openalex": 18
+  },
+  "merged": 40,
+  "dropped_prefilter": 2,
+  "dropped_known": 0,
+  "candidates": 38,
+  "candidates_without_abstract": 1
+}

@@ -1,0 +1,13 @@
+{
+  "run_id": "2026-W47",
+  "date": "2026-11-19",
+  "since": "2026-11-05",
+  "until": "2026-11-19",
+  "screened": 38,
+  "decisions": {
+    "exclude": 34,
+    "include": 3,
+    "needs_full_text": 1
+  },
+  "model": "claude-opus-5-5"
+}
