@@ -1,0 +1,98 @@
+# Search terms for the weekly sweep. discover.py builds each source's query
+# as (conditioning) AND (taxon) over title + abstract, then applies the same
+# two blocks locally as a prefilter, so every source is held to one standard.
+#
+# Terms ending in * are prefixes. Edit here, not in the code, so a change to
+# what the sweep looks for shows up in review like any other data change.
+
+conditioning:
+  - priming                  # not prim*: that also matches primer, primary, primate
+  - primed
+  - precondition*
+  - pre-exposure
+  - pre-exposed
+  - prior exposure
+  - previous exposure
+  - thermal history
+  - thermal histories
+  - stress history
+  - environmental history
+  - acclimatization
+  - acclimatisation
+  - repeated heat
+  - repeated exposure
+  - recurrent heat
+  - successive heatwave*
+  - transgenerational
+  - intergenerational
+  - multigenerational
+  - parental                 # bare parental/maternal/paternal/offspring: the backtest missed
+  - maternal                 # transgenerational papers that use none of the phrases
+  - paternal
+  - offspring
+  - progeny
+  - broodstock
+  - carryover
+  - carry-over
+  - hardening
+  - stress memory
+  - environmental memory
+  - epigenetic memory
+  - immune memory
+  - trained immunity
+  - immune training
+  - vaccin*
+  - inactivated
+  - developmental plasticity
+  - early-life exposure
+  - legacy effect*
+  - cross-tolerance
+  - cross-protection
+  - hormesis
+
+taxon:
+  - oyster*
+  - mussel*
+  - clam*
+  - scallop*
+  - cockle*
+  - abalone*
+  - bivalve*
+  - mollusc*
+  - mollusk*
+  - gastropod*
+  - coral*
+  - cnidarian*
+  - anemone*
+  - Nematostella
+  - urchin*
+  - echinoderm*
+  - sea star*
+  - starfish
+  - sea cucumber*
+  - shrimp*
+  - prawn*
+  - crab*
+  - lobster*
+  - copepod*
+  - amphipod*
+  - crustacean*
+  - barnacle*
+  - krill
+  - polychaete*
+  - bryozoan*
+  - Penaeus
+  - Litopenaeus
+  - Mytilus
+  - Crassostrea
+  - Magallana
+  - Acropora
+  - Pocillopora
+  - Haliotis
+  - Tigriopus
+
+# Per-source limits, so a broad week cannot run away with API budgets.
+limits:
+  europepmc_max: 3000
+  pubmed_max: 3000
+  openalex_max: 1500

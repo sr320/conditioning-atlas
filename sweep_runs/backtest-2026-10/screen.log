@@ -1,0 +1,42 @@
+  screened 25/608
+  screened 50/608
+  screened 75/608
+  screened 100/608
+  screened 125/608
+  screened 150/608
+  screened 175/608
+  screened 200/608
+  screened 225/608
+  screened 250/608
+  screened 275/608
+  screened 300/608
+  screened 325/608
+  screened 350/608
+  screened 375/608
+  screened 400/608
+  screened 425/608
+  screened 450/608
+  screened 475/608
+  screened 500/608
+  screened 525/608
+  screened 550/608
+  screened 575/608
+  screened 600/608
+{
+  "decisions": {
+    "include": 41,
+    "preprint_hold": 16,
+    "exclude": 524,
+    "needs_full_text": 27
+  },
+  "mode": "direct",
+  "model": "claude-opus-5-5",
+  "effort": "low",
+  "n": 608,
+  "usage": {
+    "input_tokens": 435142,
+    "output_tokens": 91565,
+    "cache_read_input_tokens": 14883232,
+    "cache_creation_input_tokens": 0
+  }
+}

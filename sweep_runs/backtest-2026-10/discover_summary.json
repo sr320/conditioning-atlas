@@ -1,0 +1,16 @@
+{
+  "run_id": "backtest-2026-10",
+  "since": "2026-03-01",
+  "until": "2026-10-25",
+  "known_ref": "fc079b3^",
+  "per_source": {
+    "europepmc": 383,
+    "pubmed": 289,
+    "openalex": 200
+  },
+  "merged": 522,
+  "dropped_prefilter": 40,
+  "dropped_known": 11,
+  "candidates": 471,
+  "candidates_without_abstract": 15
+}
