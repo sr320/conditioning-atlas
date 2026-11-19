@@ -11,6 +11,10 @@ venv/
 # Generated spreadsheet is committed; raw API dumps can be large and are cache-like
 data/search/*_raw.json
 
+# weekly sweep: raw API responses are cache-like; candidates, decisions and reports are kept
+sweep_runs/*/raw_*.jsonl
+sweep_runs/*/hits.jsonl
+
 # genomics pipeline: downloaded assemblies and tool output live on the server, not in git
 genomics/data/
 genomics/results/
