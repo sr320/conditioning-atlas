@@ -1,0 +1,14 @@
+{
+  "mode": "batch",
+  "batch_id": "msgbatch_01PKDJYp62LWnbdEr9FDf8Wi",
+  "model": "claude-opus-5-5",
+  "effort": "low",
+  "n": 15,
+  "screened_now": 15,
+  "usage": {
+    "input_tokens": 12357,
+    "output_tokens": 2454,
+    "cache_read_input_tokens": 504938,
+    "cache_creation_input_tokens": 36067
+  }
+}

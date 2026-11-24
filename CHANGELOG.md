@@ -3,6 +3,13 @@
 Format: newest first. One entry per maintenance pass. See README.md § "Updating the
 atlas" for what a normal entry should record.
 
+## 2026-11-24 — Weekly sweep 2026-W48 (automated screening)
+
+- Searched Europe PMC, PubMed and OpenAlex for 2026-11-10 to 2026-11-24 with `sweep/queries.yaml`; 15 papers were new to the atlas and screened by `claude-opus-5-5` (effort `low`) against the four inclusion criteria. Decisions: exclude 13, include 1, needs_full_text 1.
+- **No rows were added.** Phase 1 of `WEEKLY_SWEEP_PLAN.md` stops before extraction: 1 screened includes are in `pending_review.tsv` as "Screened include, needs extraction", next to the full-text and preprint holds.
+- Screened-out papers appended to `excluded_coral.tsv` (1), `excluded_immune.tsv` (1), `excluded_other.tsv` (11), with the model's reason.
+- Every decision was made from the title and abstract by a model, not a person. Check the includes and holds before extracting, and skim the exclusions in the PR.
+
 ## 2026-11-19 — Weekly sweep 2026-W47 (automated screening)
 
 - Searched Europe PMC, PubMed and OpenAlex for 2026-11-05 to 2026-11-19 with `sweep/queries.yaml`; 38 papers were new to the atlas and screened by `claude-opus-5-5` (effort `low`) against the four inclusion criteria. Decisions: exclude 34, include 3, needs_full_text 1.
